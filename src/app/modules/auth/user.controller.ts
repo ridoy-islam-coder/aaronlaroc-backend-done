@@ -17,13 +17,18 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
 
      const user = await existingUser(phoneNumber, email, password);
 
-        return res.status(201).json({ message: "User registered successfully", user:{
-            _id: user._id,
-            phoneNumber: user.phoneNumber,
-            email: user.email,
-            role: user.role,
+    //     return res.status(201).json({ message: "User registered successfully", user:{
+    //         _id: user._id,
+    //         phoneNumber: user.phoneNumber,
+    //         email: user.email,
+    //         role: user.role,
           
-        } });
+    // }});
+
+
+return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data: { _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role,},meta: null});
+
+
     }catch(error){
         next(error);
     }
