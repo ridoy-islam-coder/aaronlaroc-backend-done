@@ -46,15 +46,9 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
 
         const { user,token} = await LoginInUser(email, password);
 
-        // return res.status(201).json({ message: "User logged in successfully" ,user:{
-        //     _id: user._id,
-        //     username: user.phoneNumber,
-        //     email: user.email,
-        //     role: user.role,
-          
-        // }, token });
+    
 
-      return res.status(200).json({ success: true, message: "User logged in successfully",statusCode: 200, data: {_id: user._id,username: user.phoneNumber, email: user.email, role: user.role, token: token },
+      return res.status(200).json({ success: true, message: "User logged in successfully",statusCode: 200, data: {_id: user._id,username: `${user.firstName} ${user.lastName}`, email: user.email, role: user.role, token: token },
      meta: null
       });
 
