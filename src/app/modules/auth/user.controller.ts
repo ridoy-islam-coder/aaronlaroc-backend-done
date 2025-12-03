@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { adminEmailService, codeVerification, deleteUserService, existingUser,  getallUsers, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList, LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { xContentTypeOptions } from "helmet";
 
 
 
@@ -17,13 +18,7 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
 
      const user = await existingUser(phoneNumber, email, password);
 
-    //     return res.status(201).json({ message: "User registered successfully", user:{
-    //         _id: user._id,
-    //         phoneNumber: user.phoneNumber,
-    //         email: user.email,
-    //         role: user.role,
-          
-    // }});
+   
 
 
 return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data: { _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role,},meta: null});
@@ -51,13 +46,19 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
 
         const { user,token} = await LoginInUser(email, password);
 
-        return res.status(201).json({ message: "User logged in successfully" ,user:{
-            _id: user._id,
-            username: user.phoneNumber,
-            email: user.email,
-            role: user.role,
+        // return res.status(201).json({ message: "User logged in successfully" ,user:{
+        //     _id: user._id,
+        //     username: user.phoneNumber,
+        //     email: user.email,
+        //     role: user.role,
           
-        }, token });
+        // }, token });
+
+      return res.status(200).json({ success: true, message: "User logged in successfully",statusCode: 200, data: {_id: user._id,username: user.phoneNumber, email: user.email, role: user.role, token: token },
+     meta: null
+      });
+
+
     }catch(error){
         next(error);
     }
