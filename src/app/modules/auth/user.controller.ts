@@ -48,7 +48,7 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
 
     
 
-      return res.status(200).json({ success: true, message: "User logged in successfully",statusCode: 200, data: {_id: user._id,username: `${user.firstName} ${user.lastName}`, email: user.email, role: user.role, token: token },
+      return res.status(200).json({ success: true, message: "User logged in successfully",statusCode: 200, data: {_id: user._id,phoneNumber: user.phoneNumber, email: user.email, role: user.role, token: token },
      meta: null
       });
 

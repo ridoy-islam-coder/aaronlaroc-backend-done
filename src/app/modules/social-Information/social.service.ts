@@ -25,6 +25,9 @@ export const SocialInformationService = async (req: Request) => {
     let user_id = req.user?.id;
     let requestBody = req.body;
     requestBody.userID = user_id;
+    
+    // Token middleware থেকে আসে
+    const token = req.headers.authorization?.split(" ")[1] || null;
 
     // Define all required fields for medical data
     const allFields = [
@@ -55,9 +58,11 @@ export const SocialInformationService = async (req: Request) => {
       status: "success",
       message: `Medical data updated successfully ${completenessPercentage.toFixed(2)}%`,
       socialInfoPercentage: completenessPercentage.toFixed(2),  // Percentage result
-      updatedMedicalData
+      updatedMedicalData,
+      token: token
+     
     };
   } catch (error) {
-    return { status: 'failed', data: error };
+    return { status: 'failed', data: error,};
   }
 };

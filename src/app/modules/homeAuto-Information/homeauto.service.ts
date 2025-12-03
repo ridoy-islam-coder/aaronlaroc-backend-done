@@ -27,7 +27,8 @@ export const HomeAutoService = async (req: Request) => {
     let user_id = req.user?.id;
     let requestBody = req.body;
     requestBody.userID = user_id;
-
+    // Token middleware থেকে আসে
+    const token = req.headers.authorization?.split(" ")[1] || null;
 
     const allFields = [
       requestBody.vehicleOwnership,
@@ -69,7 +70,8 @@ export const HomeAutoService = async (req: Request) => {
       status: "success",
       message: `HomeAuto data updated successfully ${completenessPercentage.toFixed(2)}%`,
       homeautoPercentage: completenessPercentage.toFixed(2),  // Percentage result
-      updatedMedicalData
+      updatedMedicalData,
+      token: token
     };
   } catch (error) {
     console.error('Error:', error);  // Log the error to debug

@@ -72,7 +72,8 @@ export const FinancialUpdateService = async (req: Request) => {
     const user_id = req.user?.id;
     const requestBody = req.body;
     requestBody.userID = user_id;
-
+       // Token middleware থেকে আসে
+    const token = req.headers.authorization?.split(" ")[1] || null;
     // Required fields for completeness check
     const allFields = [
       requestBody.bankAccount,
@@ -103,6 +104,7 @@ export const FinancialUpdateService = async (req: Request) => {
       message: `Financial data updated successfully (${completenessPercentage.toFixed(2)}%)`,
       financialPercentage: completenessPercentage.toFixed(2),
       updatedFinancialData,
+      token: token
     };
   } catch (error: any) {
     return { status: "failed", message: error.message };
