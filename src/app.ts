@@ -16,8 +16,8 @@ import { PaymentCardRoutes } from './app/modules/payment-card/paymentcard.routes
 
 const app = express();
 
-
-app.use(cors());
+app.use(cors({ origin: ["http://localhost:5173","http://localhost:5174" ], credentials: true,}));
+// app.use(cors());
 app.use(express.json({  limit: '50mb'}));
 app.use(helmet());
 const limiter = rateLimit({windowMs: 20 * 60 * 1000, max: 100, });
