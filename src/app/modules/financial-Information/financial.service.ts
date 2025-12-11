@@ -6,7 +6,7 @@ import { SocialInfoModel } from "../social-Information/social.model";
 import { FinancialModel } from "./financial.model";
 import { Request } from "express";
 
-
+import mongoose from "mongoose";
 
 
 
@@ -22,46 +22,6 @@ import { Request } from "express";
 //     return {status:'failed', data: error};
 //   }
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -116,28 +76,90 @@ export const FinancialUpdateService = async (req: Request) => {
 
 
 
+// export const shareUserDataWithProxyset = async (userId: string) => {
+//   try {
+//     // ১. মূল user fetch + প্রয়োজনীয় fields
+//     const user = await User.findById(userId).select(
+//       "email firstName lastName proxysetId city dateOfBirth phoneNumber yearStarted company state"
+//     );
+//     if (!user) {
+//       return { status: "failed", message: "User not found" };
+//     }
+
+//     // ২. Proxyset check
+//     if (!user.proxysetId || user.proxysetId.length === 0) {
+//       return { status: "failed", message: "No proxyset users found" };
+//     }
+
+//     // ৩. Proxyset-related data fetch (exclude createdAt, updatedAt)
+//     const financialData = await FinancialModel.find(
+//       { userID: { $in: user.proxysetId } },
+//       "-createdAt -updatedAt -__v"
+//     );
+
+
+
+//     const medicalData = await MedicalModel.find(
+//       { userID: { $in: user.proxysetId } },
+//       "-createdAt -updatedAt -__v"
+//     );
+
+//     const HomeAutoData = await HomeAutoModel.find(
+//       { userID: { $in: user.proxysetId } },
+//       "-createdAt -updatedAt -__v"
+//     );
+
+//     const SocialInfoData = await SocialInfoModel.find(
+//       { userID: { $in: user.proxysetId } },
+//       "-createdAt -updatedAt -__v"
+//     );
 
 
 
 
+//     if (
+//       financialData.length === 0 &&
+//       medicalData.length === 0 &&
+//       HomeAutoData.length === 0 &&
+//       SocialInfoData.length === 0
+//     ) {
+//       return { status: "failed", message: "No data found" };
+//     }
 
+//     // ৪. Proxyset users info (exclude timestamps)
+//     const proxysetUsers = await User.find(
+//       { _id: { $in: user.proxysetId } }
+//     ).select("email firstName lastName");
 
+//     proxysetUsers.forEach((proxyUser) => {
+//       console.log(`Shared data with ${proxyUser.email}`);
+//     });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//     // ৫. Return combined data including caller user details
+//     return {
+//       status: "success",
+//       callerUser: {
+//         id: user._id,
+//         email: user.email,
+//         firstName: user.firstName,
+//         lastName: user.lastName,
+//         city: user.city,
+//         dateOfBirth: user.dateOfBirth,
+//         phoneNumber: user.phoneNumber,
+//         yearStarted: user.yearStarted,
+//         company: user.company,
+//         state: user.state
+//       },
+//       financialData,
+//       medicalData,
+//       HomeAutoData,
+//       SocialInfoData,
+//       proxysetUsers
+//     };
+//   } catch (error) {
+//     return { status: "failed", data: error };
+//   }
+// };
 
 
 
@@ -147,40 +169,47 @@ export const FinancialUpdateService = async (req: Request) => {
 
 export const shareUserDataWithProxyset = async (userId: string) => {
   try {
-    // ১. মূল user fetch + প্রয়োজনীয় fields
+    // ১. User সংগ্রহ
     const user = await User.findById(userId).select(
       "email firstName lastName proxysetId city dateOfBirth phoneNumber yearStarted company state"
     );
+
     if (!user) {
       return { status: "failed", message: "User not found" };
     }
 
-    // ২. Proxyset check
+    // ২. Proxyset Validation
     if (!user.proxysetId || user.proxysetId.length === 0) {
       return { status: "failed", message: "No proxyset users found" };
     }
 
-    // ৩. Proxyset-related data fetch (exclude createdAt, updatedAt)
+    // ৩. Proxyset ID → ObjectId এ convert
+    const proxyIds = user.proxysetId.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+
+    // ৪. সব ডাটা সংগ্রহ (timestamps বাদ দিয়ে)
     const financialData = await FinancialModel.find(
-      { userID: { $in: user.proxysetId } },
+      { userID: { $in: proxyIds } },
       "-createdAt -updatedAt -__v"
     );
 
     const medicalData = await MedicalModel.find(
-      { userID: { $in: user.proxysetId } },
+      { userID: { $in: proxyIds } },
       "-createdAt -updatedAt -__v"
     );
 
     const HomeAutoData = await HomeAutoModel.find(
-      { userID: { $in: user.proxysetId } },
+      { userID: { $in: proxyIds } },
       "-createdAt -updatedAt -__v"
     );
 
     const SocialInfoData = await SocialInfoModel.find(
-      { userID: { $in: user.proxysetId } },
+      { userID: { $in: proxyIds } },
       "-createdAt -updatedAt -__v"
     );
 
+    // যদি কোনটার ডেটাই না থাকে
     if (
       financialData.length === 0 &&
       medicalData.length === 0 &&
@@ -190,16 +219,16 @@ export const shareUserDataWithProxyset = async (userId: string) => {
       return { status: "failed", message: "No data found" };
     }
 
-    // ৪. Proxyset users info (exclude timestamps)
+    // ৫. Proxyset Users Info আনা
     const proxysetUsers = await User.find(
-      { _id: { $in: user.proxysetId } }
+      { _id: { $in: proxyIds } }
     ).select("email firstName lastName");
 
     proxysetUsers.forEach((proxyUser) => {
       console.log(`Shared data with ${proxyUser.email}`);
     });
 
-    // ৫. Return combined data including caller user details
+    // ৬. Final Response
     return {
       status: "success",
       callerUser: {
@@ -221,6 +250,6 @@ export const shareUserDataWithProxyset = async (userId: string) => {
       proxysetUsers
     };
   } catch (error) {
-    return { status: "failed", data: error };
+    return { status: "failed", data: error};
   }
 };
