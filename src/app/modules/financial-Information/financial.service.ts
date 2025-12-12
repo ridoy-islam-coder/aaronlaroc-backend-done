@@ -6,7 +6,7 @@ import { SocialInfoModel } from "../social-Information/social.model";
 import { FinancialModel } from "./financial.model";
 import { Request } from "express";
 
-import mongoose from "mongoose";
+
 
 
 
@@ -164,92 +164,82 @@ export const FinancialUpdateService = async (req: Request) => {
 
 
 
+export interface CallerUserData {
+  id: string;
+  email: string;
+  phoneNumber?: string;
+}
 
+export interface ShareFinancialResponse {
+  status: "success" | "error";
+  callerUser?: CallerUserData;
+  financialData?: any[];
+  medicalData?: any[];
+  HomeAutoData?: any[];
+  SocialInfoData?: any[];
+  proxysetUsers?: { _id: string; email: string }[];
+  message?: string;
+  error?: any;
+}
 
-
-export const shareUserDataWithProxyset = async (userId: string) => {
+export const getFinancialDataForUser = async (
+  userId: string
+): Promise<ShareFinancialResponse> => {
   try {
-    // ১. User সংগ্রহ
-    const user = await User.findById(userId).select(
-      "email firstName lastName proxysetId city dateOfBirth phoneNumber yearStarted company state"
-    );
-
+    // 1️⃣ caller user find
+    const user = await User.findById(userId).select("-password -__v");
     if (!user) {
-      return { status: "failed", message: "User not found" };
+      return { status: "error", message: "User not found" };
     }
 
-    // ২. Proxyset Validation
-    if (!user.proxysetId || user.proxysetId.length === 0) {
-      return { status: "failed", message: "No proxyset users found" };
-    }
-
-    // ৩. Proxyset ID → ObjectId এ convert
-    const proxyIds = user.proxysetId.map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
-
-    // ৪. সব ডাটা সংগ্রহ (timestamps বাদ দিয়ে)
-    const financialData = await FinancialModel.find(
-      { userID: { $in: proxyIds } },
+    // 2️⃣ caller own financial data
+    const callerFinancialData = await FinancialModel.find(
+      { userID: user._id },
       "-createdAt -updatedAt -__v"
     );
 
-    const medicalData = await MedicalModel.find(
-      { userID: { $in: proxyIds } },
+    // 3️⃣ caller own medical data
+    const callerMedicalData = await MedicalModel.find(
+      { userID: user._id },
       "-createdAt -updatedAt -__v"
     );
 
-    const HomeAutoData = await HomeAutoModel.find(
-      { userID: { $in: proxyIds } },
+    // 4️⃣ caller own home auto data
+    const callerHomeAutoData = await HomeAutoModel.find(
+      { userID: user._id },
       "-createdAt -updatedAt -__v"
     );
 
-    const SocialInfoData = await SocialInfoModel.find(
-      { userID: { $in: proxyIds } },
+    // 5️⃣ caller own social info data
+    const callerSocialInfoData = await SocialInfoModel.find(
+      { userID: user._id },
       "-createdAt -updatedAt -__v"
     );
 
-    // যদি কোনটার ডেটাই না থাকে
-    if (
-      financialData.length === 0 &&
-      medicalData.length === 0 &&
-      HomeAutoData.length === 0 &&
-      SocialInfoData.length === 0
-    ) {
-      return { status: "failed", message: "No data found" };
-    }
-
-    // ৫. Proxyset Users Info আনা
+    // 6️⃣ proxyset users (only list, no data)
     const proxysetUsers = await User.find(
-      { _id: { $in: proxyIds } }
-    ).select("email firstName lastName");
+      { _id: { $in: user.proxysetId || [] } },
+      "_id email"
+    );
 
-    proxysetUsers.forEach((proxyUser) => {
-      console.log(`Shared data with ${proxyUser.email}`);
-    });
-
-    // ৬. Final Response
     return {
       status: "success",
       callerUser: {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        city: user.city,
-        dateOfBirth: user.dateOfBirth,
         phoneNumber: user.phoneNumber,
-        yearStarted: user.yearStarted,
-        company: user.company,
-        state: user.state
       },
-      financialData,
-      medicalData,
-      HomeAutoData,
-      SocialInfoData,
-      proxysetUsers
+      financialData: callerFinancialData,
+      medicalData: callerMedicalData,
+      HomeAutoData: callerHomeAutoData,
+      SocialInfoData: callerSocialInfoData,
+      proxysetUsers: proxysetUsers.map((p) => ({
+        _id: p._id.toString(),
+        email: p.email,
+      })),
     };
   } catch (error) {
-    return { status: "failed", data: error};
+    console.error("Error in getFinancialDataForUser:", error);
+    return { status: "error", message: "Server error", error };
   }
 };
