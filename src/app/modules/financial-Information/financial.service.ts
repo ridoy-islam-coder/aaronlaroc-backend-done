@@ -32,9 +32,9 @@ export const FinancialUpdateService = async (req: Request) => {
     const user_id = req.user?.id;
     const requestBody = req.body;
     requestBody.userID = user_id;
-       // Token middleware থেকে আসে
+     
     const token = req.headers.authorization?.split(" ")[1] || null;
-    // Required fields for completeness check
+ 
     const allFields = [
       requestBody.bankAccount,
       requestBody.retirementAccount,
@@ -42,7 +42,7 @@ export const FinancialUpdateService = async (req: Request) => {
       requestBody.debt,
     ];
 
-    // Count filled fields
+  
     const filledFields = allFields.filter(
       (field) => typeof field === "string" && field.trim() !== ""
     ).length;
@@ -54,7 +54,7 @@ export const FinancialUpdateService = async (req: Request) => {
       { userID: user_id },
       { 
         ...requestBody, 
-        financialPercentage: completenessPercentage  // ✅ fixed
+        financialPercentage: completenessPercentage  
       },
       { upsert: true, new: true }
     );
@@ -70,6 +70,60 @@ export const FinancialUpdateService = async (req: Request) => {
     return { status: "failed", message: error.message };
   }
 };
+
+
+
+
+
+
+export const FinancialGetService = async (req: Request) => {
+  try {
+
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      return { status: "failed", message: "Unauthorized" };
+    }
+
+
+    const financialData = await FinancialModel.findOne(
+      { userID: user_id },
+      "-createdAt -updatedAt"
+    );
+
+    if (!financialData) {
+      return { status: "failed", message: "No financial data found" };
+    }
+
+    return {
+      status: "success",
+      data: financialData,
+    };
+  } catch (error: any) {
+    return { status: "failed", message: error.message };
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
