@@ -66,3 +66,36 @@ export const SocialInformationService = async (req: Request) => {
     return { status: 'failed', data: error,};
   }
 };
+
+
+
+
+
+
+export const SocialGetService = async (req: Request) => {
+  try {
+
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      return { status: "failed", message: "Unauthorized" };
+    }
+
+
+    const financialData = await SocialInfoModel.findOne(
+      { userID: user_id },
+      "-createdAt -updatedAt"
+    );
+
+    if (!financialData) {
+      return { status: "failed", message: "No financial data found" };
+    }
+
+    return {
+      status: "success",
+      data: financialData,
+    };
+  } catch (error: any) {
+    return { status: "failed", message: error.message };
+  }
+};
