@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { ReportModel } from "./report.model";
+import { getNewUsersLast10DaysService } from "../auth/user.service";
+import { User } from "../auth/user.model";
 
 
 
@@ -67,6 +69,48 @@ export const GetAllReportsService = async () => {
       status: false,
       message: "Failed to fetch reports",
       data: error
+    };
+  }
+};
+
+
+
+
+
+
+
+    
+export const DashboardOverviewService = async () => {
+  try {
+  
+    const reports = await ReportModel.find()
+      .populate("userID", "firstName lastName email imgUrl");
+
+  
+    const totalReports = await ReportModel.countDocuments();
+
+      const tenDaysAgo = new Date();
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    
+      const count = await User.countDocuments({
+        createdAt: { $gte: tenDaysAgo },
+      });
+
+    return {
+      status: true,
+      message: "Dashboard data fetched successfully",
+      data: {
+        reports,
+        totalReports,
+        count
+      }
+    };
+
+  } catch (error: any) {
+    return {
+      status: false,
+      message: "Failed to fetch dashboard data",
+      error: error.message
     };
   }
 };
