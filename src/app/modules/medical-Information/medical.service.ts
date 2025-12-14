@@ -115,3 +115,32 @@ export const calculateMedicalDataCompleteness = async (req: Request, res: Respon
 
 
 
+
+
+export const MedicalGetService = async (req: Request) => {
+  try {
+
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      return { status: "failed", message: "Unauthorized" };
+    }
+
+
+    const financialData = await MedicalModel.findOne(
+      { userID: user_id },
+      "-createdAt -updatedAt"
+    );
+
+    if (!financialData) {
+      return { status: "failed", message: "No financial data found" };
+    }
+
+    return {
+      status: "success",
+      data: financialData,
+    };
+  } catch (error: any) {
+    return { status: "failed", message: error.message };
+  }
+};

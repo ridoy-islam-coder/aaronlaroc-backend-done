@@ -2,7 +2,7 @@
 import express from "express";
 
 import { auth } from './../../middleware/auth.middleware';
-import { UpdateMedical } from "./medical.controller";
+import { GetMedicalData, UpdateMedical } from "./medical.controller";
 
 
 
@@ -17,7 +17,7 @@ router.post("/CreateMedical",auth,UpdateMedical)
 //update Medical Information
 router.post("/UpdateMedical",auth,UpdateMedical)
 
-
+router.get("/GetMedicalData",auth,GetMedicalData)
 
 
 
