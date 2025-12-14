@@ -3,7 +3,7 @@ import express from "express";
 
 import { auth } from './../../middleware/auth.middleware';
 
-import { HomeAutoUpdate } from "./homeauto.controller";
+import { GetHomeautoData, HomeAutoUpdate } from "./homeauto.controller";
 
 
 
@@ -14,8 +14,11 @@ const router = express.Router();
 
 // create Financial Information 
 router.post("/CreateHomeAuto",auth,HomeAutoUpdate)
-//update Medical Information
+//update Financial Information
 router.post("/UpdateHomeAuto",auth,HomeAutoUpdate)
+
+//get Financial Information
+router.get("/GetHomeautoData",auth,GetHomeautoData)
 
 
 

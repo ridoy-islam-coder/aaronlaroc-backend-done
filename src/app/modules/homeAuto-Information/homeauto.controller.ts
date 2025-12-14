@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { HomeAutoService } from "./homeauto.service";
+import { HomeautoGetService, HomeAutoService } from "./homeauto.service";
 
 
 
@@ -8,3 +8,11 @@ import { HomeAutoService } from "./homeauto.service";
     res.json(result);
 
     }
+
+
+
+    export const GetHomeautoData = async (req: Request, res: Response) => {
+      const result = await HomeautoGetService(req);
+      return res.status(200).json(result);
+    };
+    
