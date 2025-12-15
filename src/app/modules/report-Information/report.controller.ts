@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { DashboardOverviewService, GetAllReportsService, ReportCountService, ReportService } from "./report.service";
+import {  GetAllReportsService,  getReportStatusCountService,  ReportService, updateReportService } from "./report.service";
 
 
 
@@ -13,10 +13,7 @@ export const ReportController=async (req:Request,res:Response) => {
 }
 
 
-export const ReportCountController = async (req: Request, res: Response) => {
-  const result = await ReportCountService();
-  res.json(result);
-};
+
 
 
 export const GetAllReportsController = async (req: Request, res: Response) => {
@@ -26,20 +23,31 @@ export const GetAllReportsController = async (req: Request, res: Response) => {
 
 
 
-export const DashboardOverview = async (req: Request, res: Response) => {
+export const getReportStatusCount = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await DashboardOverviewService();
+    const result = await getReportStatusCountService();
 
-    if (!result.status) {
-      return res.status(400).json(result);
+    if (result.status) {
+      res.status(200).json({ status: "success", data: result.data });
+    } else {
+      res.status(500).json({ status: "error", message: "Failed to fetch report counts", error: result.data });
     }
+  } catch (err: any) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
 
-    return res.status(200).json(result);
 
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Server error"
-    });
+export const updateReportController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await updateReportService(req);
+
+    if (result.status) {
+      res.status(200).json({ status: "success", message: result.message });
+    } else {
+      res.status(404).json({ status: "error", message: result.message || "Failed to update report", error: result.data });
+    }
+  } catch (err: any) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 };

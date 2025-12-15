@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { ReportModel } from "./report.model";
-import { getNewUsersLast10DaysService } from "../auth/user.service";
-import { User } from "../auth/user.model";
+
+
 
 
 
@@ -10,11 +10,12 @@ import { User } from "../auth/user.model";
 
 export const ReportService = async (req: Request, res: Response) => {
     try {
-      const { problem, details, userID } = req.body;
+      const { problem, details,status, userID } = req.body;
 
       const newReport = await ReportModel.create({
         problem,
         details,
+        status,
         userID,
       });
      return ({status:true,Message:"Report created successfully", data:newReport})
@@ -30,26 +31,7 @@ export const ReportService = async (req: Request, res: Response) => {
 
 
 
-  export const ReportCountService = async () => {
-  try {
-    const count = await ReportModel.countDocuments();
-
-    return {
-      status: true,
-      message: "Total reports fetched successfully",
-      totalReports: count
-    };
-
-  } catch (error: any) {
-
-    return {
-      status: false,
-      message: "Failed to fetch total reports",
-      data: error
-    };
-  }
-};
-
+  
 
 
 
@@ -78,39 +60,50 @@ export const GetAllReportsService = async () => {
 
 
 
-
-    
-export const DashboardOverviewService = async () => {
+export const getReportStatusCountService = async () => {
   try {
-  
-    const reports = await ReportModel.find()
-      .populate("userID", "firstName lastName email imgUrl");
-
-  
-    const totalReports = await ReportModel.countDocuments();
-
-      const tenDaysAgo = new Date();
-      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-    
-      const count = await User.countDocuments({
-        createdAt: { $gte: tenDaysAgo },
-      });
+    const [progressCount, completedCount, totalCount] = await Promise.all([
+      ReportModel.countDocuments({ status: "Progress" }),
+      ReportModel.countDocuments({ status: "Completed" }),
+      ReportModel.countDocuments() // total reports
+    ]);
 
     return {
       status: true,
-      message: "Dashboard data fetched successfully",
       data: {
-        reports,
-        totalReports,
-        count
+        progress: progressCount,
+        completed: completedCount,
+        totalReports: totalCount
       }
     };
+  } catch (error) {
+    return { status: false, data: error };
+  }
+};
 
-  } catch (error: any) {
-    return {
-      status: false,
-      message: "Failed to fetch dashboard data",
-      error: error.message
-    };
+
+
+
+
+export const updateReportService = async (req: Request) => {
+  try {
+    const reportId = req.params.id;
+    const requestBody = req.body;
+
+    const report = await ReportModel.findById(reportId);
+    if (!report) {
+      return { status: false, message: "Report not found" };
+    }
+
+    // Update fields (e.g., problem, details, status)
+    report.problem = requestBody.problem ?? report.problem;
+    report.details = requestBody.details ?? report.details;
+    report.status = requestBody.status ?? report.status;
+
+    await report.save();
+
+    return { status: true, message: "Report updated successfully" };
+  } catch (error) {
+    return { status: false, data: error };
   }
 };
