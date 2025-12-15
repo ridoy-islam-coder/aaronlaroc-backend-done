@@ -13,5 +13,5 @@ res.json(result);
  export const GetSocialData = async (req: Request, res: Response) => {
    const result = await SocialGetService(req);
    return res.status(200).json(result);
-  };
+};
         

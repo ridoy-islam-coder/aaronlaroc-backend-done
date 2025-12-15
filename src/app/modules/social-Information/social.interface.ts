@@ -5,8 +5,8 @@ import { IUser } from "../auth/user.interface";
 
 export interface ISocialInfo extends Document {
   userID: IUser | Types.ObjectId;
-  socialMedia?: string;       // Social media info/link
+  socialMedia?: string;       
   website?: string;   
-  socialInfoPercentage:number; // Social information completeness percentage
-  streamingService?: string;  // Streaming service name
+  socialInfoPercentage:number; 
+  streamingService?: string;  
 }

@@ -11,8 +11,8 @@ import { HomeautoGetService, HomeAutoService } from "./homeauto.service";
 
 
 
-    export const GetHomeautoData = async (req: Request, res: Response) => {
+export const GetHomeautoData = async (req: Request, res: Response) => {
       const result = await HomeautoGetService(req);
       return res.status(200).json(result);
-    };
+};
     

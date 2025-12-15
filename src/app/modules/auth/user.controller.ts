@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { adminEmailService, codeVerification, deleteUserService, existingUser,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList, LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
-import { xContentTypeOptions } from "helmet";
+
 
 
 
@@ -57,31 +57,6 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
         next(error);
     }
 }   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -149,7 +124,7 @@ export const ProxysetController = async (req: Request, res: Response) => {
 
 
 export const getAllProxysetController = async (req: Request, res: Response) => {
-  const { id } = req.params; // or use req.query.id if appropriate
+  const { id } = req.params; 
   const result = await getProxysetData(id);
   return res.json(result);
 };
@@ -188,24 +163,6 @@ export const alldatapercentage = async (req: Request, res: Response) => {
     });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

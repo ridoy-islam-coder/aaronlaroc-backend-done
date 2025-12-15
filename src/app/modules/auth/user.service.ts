@@ -7,9 +7,9 @@ import mongoose, { Types } from 'mongoose';
 import { SendEmail } from "../../../helpers/emailHelper";
 import { ReportModel } from "../report-Information/report.model";
 
-// Define PipelineStage type for aggregation pipelines (use a more specific type/import if available)
+
 type PipelineStage = any;
-// Extend Express Request type to include 'user'
+
 declare global {
   namespace Express {
     interface Request {
@@ -60,7 +60,7 @@ export const LoginInUser = async (email: string, password: string) => {
 
     const token = jwt.sign(
         { userId: user._id, role: user.role },
-        config.jwt_secret as string, { expiresIn: "24h" }
+        config.jwt_secret as string, { expiresIn: "30d" }
     );
 
     return {
@@ -124,10 +124,10 @@ export const Searchbarservice = async (searchTerm:string) => {
  
     const users = await User.find({
       $or: [
-        { email: { $regex: searchTerm, $options: 'i' } },  // Case-insensitive search for email
+        { email: { $regex: searchTerm, $options: 'i' } },  
         { phoneNumber: { $regex: searchTerm, $options: 'i' } },  
       ]
-    },{_id: 0,role:0,password:0,createdAt:0,updatedAt:0,__v:0}); // Case-insensitive search for phoneNumber});
+    },{_id: 0,role:0,password:0,createdAt:0,updatedAt:0,__v:0}); 
 
     return {
       status: "success",
@@ -160,55 +160,6 @@ export const Searchbarservice = async (searchTerm:string) => {
 
 
 
-
-
-
-// export const ProxysetService = async (req: Request) => {
-//   try {
-//     const userId = req.user?.id; 
-//     const ProxysetUserId = req.params.proxysetId;
-
-  
-
-
-//     if (!userId || !ProxysetUserId || !mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(ProxysetUserId)) {
-//       return { status: 'failed', message: 'Invalid user or followed user ID' };
-//     }
-
-//     if (userId === ProxysetUserId) {
-//       return { status: 'failed', message: "You cannot follow yourself" };
-//     }
-
-//     const ProxysetUserIdObjectId = new mongoose.Types.ObjectId(ProxysetUserId);
-
-  
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return { status: 'failed', message: 'User not found' };
-//     }
-
-
-//     const followedUser = await User.findById(ProxysetUserIdObjectId);
-//     if (!followedUser) {
-//       return { status: 'failed', message: "Followed user not found" };
-//     }
-
-   
-//     if (user.proxysetId.includes(ProxysetUserIdObjectId)) {
-//       return { status: 'failed', message: "You are already following this user" };
-//     }
-
- 
-//     user.proxysetId.push(ProxysetUserIdObjectId);
-
- 
-//     await user.save();
-
-//     return { status: 'success', message: 'User followed successfully', data: user };
-//   } catch (error) {
-//       return {status:'failed', data: error};
-//   }
-// };
 
 
 

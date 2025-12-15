@@ -3,18 +3,7 @@ import { MedicalModel } from "./medical.model";
 
 
 
-// export const MedicalUpdateService = async (req:Request) => {
-//   try {
-//        let user_id = req.user?.id;
-//         let requestBody = req.body;
-//         requestBody.userID = user_id;
-//         await MedicalModel.findOneAndUpdate({userID: user_id}, requestBody, {upsert: true, new: true})
-//         return ({status:"success",message:"Financial Update successfully"})
 
-//   } catch (error) {
-//     return {status:'failed', data: error};
-//   }
-// }
 
 
 
@@ -27,10 +16,10 @@ export const MedicalUpdateService = async (req: Request) => {
     let user_id = req.user?.id;
     let requestBody = req.body;
     requestBody.userID = user_id;
-        // Token middleware থেকে আসে
+ 
     const token = req.headers.authorization?.split(" ")[1] || null;
 
-    // Define all required fields for medical data
+
     const allFields = [
       requestBody.healthInsurance,
       requestBody.supplementalInsurance,
@@ -38,19 +27,19 @@ export const MedicalUpdateService = async (req: Request) => {
       requestBody.knownAilments
     ];
 
-    // Count how many fields are filled (non-null, non-empty)
+    
     const filledFields = allFields.filter(field => field && field.trim() !== "").length;
 
-    // Calculate percentage completeness (based on number of fields filled)
+  
     const totalFields = allFields.length;
     const completenessPercentage = (filledFields / totalFields) * 100;
 
-    // Update medical data and include completeness percentage
+ 
     const updatedMedicalData = await MedicalModel.findOneAndUpdate(
       { userID: user_id },
        { 
         ...requestBody, 
-        medicalsPercentage: completenessPercentage  // ✅ fixed
+        medicalsPercentage: completenessPercentage 
       },
       { upsert: true, new: true }
     );
@@ -58,7 +47,7 @@ export const MedicalUpdateService = async (req: Request) => {
     return {
       status: "success",
       message: `Medical data updated successfully ${completenessPercentage.toFixed(2)}%`,
-      medicalsPercentage: completenessPercentage.toFixed(2),  // Percentage result
+      medicalsPercentage: completenessPercentage.toFixed(2),  
       updatedMedicalData,
        token: token
     };
@@ -78,7 +67,7 @@ export const calculateMedicalDataCompleteness = async (req: Request, res: Respon
   try {
     const { healthInsurance, supplementalInsurance, medications, knownAilments } = req.body;
 
-    // Define all required fields
+   
     const allFields = [
       healthInsurance,
       supplementalInsurance,
@@ -86,20 +75,20 @@ export const calculateMedicalDataCompleteness = async (req: Request, res: Respon
       knownAilments
     ];
     
-    // Count how many fields are filled (non-null, non-empty)
+  
     const filledFields = allFields.filter(field => field && field.trim() !== "").length;
 
-    // Calculate percentage completeness (based on number of fields filled)
+    
     const totalFields = allFields.length;
     const completenessPercentage = (filledFields / totalFields) * 100;
 
-    // Return the calculated percentage
+   
     return res.status(200).json({
       status: "success",
       message: `Data completeness: ${completenessPercentage.toFixed(2)}%`,
-      completenessPercentage: completenessPercentage.toFixed(2), // Percentage result
-      filledFields, // Number of filled fields
-      totalFields,  // Total number of fields
+      completenessPercentage: completenessPercentage.toFixed(2), 
+      filledFields, 
+      totalFields,  
     });
   } catch (error) {
     console.error(error);

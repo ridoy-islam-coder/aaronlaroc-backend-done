@@ -6,18 +6,11 @@ import {  FinancialGetService, FinancialUpdateService, shareUserDataWithProxyset
 
 
 
-    // export const CreateFinancial=async (req:Request,res:Response) => {
-    // let result = await FinancialCreateService(req);
-    // res.json(result);
-
-    // }
-
-
-     export const UpdateFinancial=async (req:Request,res:Response) => {
+ export const UpdateFinancial=async (req:Request,res:Response) => {
     let result = await FinancialUpdateService(req);
     res.json(result);
 
-    }
+  }
 
 
 export const GetFinancialData = async (req: Request, res: Response) => {
@@ -32,7 +25,7 @@ export const GetFinancialData = async (req: Request, res: Response) => {
 
 
     export const shareFinancial=async (req:Request,res:Response) => {
-    const id = req.params.id; // or req.body.id, depending on how id is sent
+    const id = req.params.id; 
     let result = await shareUserDataWithProxyset(id);
     res.json(result);
 

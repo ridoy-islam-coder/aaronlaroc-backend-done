@@ -35,7 +35,7 @@ const userSchema =  new Schema<IUser>({
     type: String,
     required: true,
     unique: true,  // Ensures email is unique
-    match: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/, // Simple email validation regex
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
   password: {
     type: String,
@@ -46,8 +46,7 @@ const userSchema =  new Schema<IUser>({
   phoneNumber: {
     type: String,
     required: true,
-    // match: /^\d{10}$/, 
-    // Example pattern for 10-digit phone numbers
+    match: /^\+[1-9]\d{1,14}$/,
   },
    otp:{type:String},
       imgUrl: {
@@ -65,15 +64,6 @@ const userSchema =  new Schema<IUser>({
 }, {
     timestamps: true,versionKey:false
 })
-
-// // Virtual
-// userSchema.virtual('fullName').get(function () {
-//   return `${this.firstName || ""} ${this.lastName || ""}`.trim();
-// });
-
-// // Enable virtuals in JSON
-// userSchema.set("toJSON", { virtuals: true });
-// userSchema.set("toObject", { virtuals: true });
 
 
 export const User = model<IUser>("User", userSchema)

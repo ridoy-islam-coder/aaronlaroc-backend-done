@@ -23,20 +23,20 @@ export interface IHomeVehicle extends Document {
   userID:IUser | Types.ObjectId;
 
   // Vehicle
-  vehicleOwnership?: TVehicleOwnership;   // Own, Lease, or No Vehicle
-  vehicleMakeModel?: string;              // Example: "Toyota Corolla 2022"
+  vehicleOwnership?: TVehicleOwnership;   
+  vehicleMakeModel?: string;              
   hasCarInsurance?: boolean; 
-  homeautoPercentage: number;             // Yes/No
-  carInsuranceProvider?: string;          // Optional extra detail
+  homeautoPercentage: number;           
+  carInsuranceProvider?: string;          
 
-  // ATV/Boat/Motorcycle
-  hasPowerToys?: boolean;                 // Yes/No
-  powerToyTypes?: TPowerToy[];            // Which ones (ATV, Boat, Motorcycle)
+ 
+  hasPowerToys?: boolean;               
+  powerToyTypes?: TPowerToy[];            
 
   // Home
-  homeOccupancy?: THomeOccupancy;         // Own, Rent, Other
-  hasHomeInsurance?: boolean;             // Yes/No
-  homeInsuranceType?: THomeInsuranceType; // Homeowner or Renter
+  homeOccupancy?: THomeOccupancy;         
+  hasHomeInsurance?: boolean;             
+  homeInsuranceType?: THomeInsuranceType; 
 
   createdAt?: Date;
   updatedAt?: Date;

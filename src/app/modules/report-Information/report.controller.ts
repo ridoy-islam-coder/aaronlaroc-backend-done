@@ -6,7 +6,6 @@ import {  GetAllReportsService,  getReportStatusCountService,  ReportService, up
 
 
 export const ReportController=async (req:Request,res:Response) => {
-  
     let result = await ReportService(req,res);
     res.json(result);
 

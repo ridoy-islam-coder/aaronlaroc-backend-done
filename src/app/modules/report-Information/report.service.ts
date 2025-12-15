@@ -101,7 +101,7 @@ export const updateReportService = async (req: Request) => {
       return { status: false, message: "Report not found" };
     }
 
-    // Update fields (e.g., problem, details, status)
+ 
     report.problem = requestBody.problem ?? report.problem;
     report.details = requestBody.details ?? report.details;
     report.status = requestBody.status ?? report.status;
