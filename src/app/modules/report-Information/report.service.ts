@@ -9,23 +9,29 @@ import { ReportModel } from "./report.model";
 
 
 export const ReportService = async (req: Request, res: Response) => {
-    try {
-      const { problem, details,status, userID } = req.body;
+  try {
+    const { problem, details, status, userID } = req.body;
 
-      const newReport = await ReportModel.create({
-        problem,
-        details,
-        status,
-        userID,
-      });
-     return ({status:true,Message:"Report created successfully", data:newReport})
-  
+    const newReport = await ReportModel.create({
+      problem,
+      details,
+      status, 
+      userID,
+    });
 
-    } catch (error: any) {
-        return {status:'false', message: "Failed to create report", data: error};
-    
- }
+    return {
+      status: true,
+      message: "Report created successfully",
+      data: newReport,
+    };
+  } catch (error: any) {
+    return {
+      status: false,
+      message: "Failed to create report",
+      data: error,
+    };
   }
+};
 
 
 
