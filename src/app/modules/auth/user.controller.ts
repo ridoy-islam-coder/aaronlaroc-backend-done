@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, codeVerification, deleteUserService, existingUser,  getallUsers, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList, LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminEmailService, codeVerification, deleteUserService, existingUser,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList, LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 import { xContentTypeOptions } from "helmet";
 
 
@@ -331,6 +331,30 @@ export const getNewUsersLast10Days = async (req: Request, res: Response) => {
     res.json(result);
 
     }
+
+
+
+
+export const getCounts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await getCountsService(req);
+
+    if (result.status) {
+      res.status(200).json({ status: "success", data: result.data });
+    } else {
+      res.status(500).json({ status: "error", message: "Failed to fetch counts", error: result.data });
+    }
+  } catch (err: any) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+
+
+
+
+
+
 
 
 

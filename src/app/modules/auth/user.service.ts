@@ -5,6 +5,7 @@ import { config } from './../../config/index';
 import { NextFunction, Request } from "express";
 import mongoose, { Types } from 'mongoose';
 import { SendEmail } from "../../../helpers/emailHelper";
+import { ReportModel } from "../report-Information/report.model";
 
 // Define PipelineStage type for aggregation pipelines (use a more specific type/import if available)
 type PipelineStage = any;
@@ -569,6 +570,59 @@ export const deleteUserService = async (req:Request) => {
     return {status: false, data: error};
   }
 }
+
+
+
+
+
+
+
+
+
+
+export const getCountsService = async (req: Request) => {
+  try {
+    const days = Number(req.query.days) || 10; // optional ?days=5
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - days);
+
+    const [totalUsers, newUsersLastNDays, totalReports] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ createdAt: { $gte: tenDaysAgo } }),
+      ReportModel.countDocuments()
+    ]);
+
+    return {
+      status: true,
+      data: {
+        totalUsers,
+        newUsersLastNDays,
+        totalReports
+      }
+    };
+  } catch (error) {
+    return { status: false, data: error };
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
