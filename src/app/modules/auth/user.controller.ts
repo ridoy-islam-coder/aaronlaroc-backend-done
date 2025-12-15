@@ -358,35 +358,18 @@ export const getCounts = async (req: Request, res: Response): Promise<void> => {
 
 
 
-    
 export class UserAnalysisController {
   static async getAnalysis(req: Request, res: Response) {
     try {
-      const { type } = req.query;
-
-      let result;
-      switch (type) {
-        case "daily":
-          result = await UserAnalysisService.getDailyAnalysis();
-          break;
-        case "monthly":
-          result = await UserAnalysisService.getMonthlyAnalysis();
-          break;
-        case "yearly":
-          result = await UserAnalysisService.getYearlyAnalysis();
-          break;
-        default:
-          return res.status(400).json({
-            success: false,
-            message: "Invalid type. Use ?type=daily | monthly | yearly",
-          });
-      }
+      const daily = await UserAnalysisService.getDailyAnalysis();
+      const monthly = await UserAnalysisService.getMonthlyAnalysis();
+      const yearly = await UserAnalysisService.getYearlyAnalysis();
 
       res.json({
         success: true,
-        type,
-        labels: result.labels,
-        data: result.data,
+        daily,
+        monthly,
+        yearly
       });
     } catch (error) {
       console.error(error);
