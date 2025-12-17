@@ -362,34 +362,6 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
-// export const getAllUserDataService = async (
-//   requestedUserId: string,
-//   loggedInUserId: string
-// ) => {
-
-//   const user = await User.findById(requestedUserId).select("proxysetId");
-//   if (!user) throw new Error("USER_NOT_FOUND");
-
- 
-//   const isOwnData = requestedUserId.toString() === loggedInUserId.toString();
-
-//   const isProxyUser = user.proxysetId.some(
-//     (id: any) => id.toString() === loggedInUserId.toString()
-//   );
-
-
-//   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
-
- 
-//   const [homeauto, medical, financial,socialInfo] = await Promise.all([
-//     HomeAutoModel.find({ userID: requestedUserId }),
-//     MedicalModel.find({ userID: requestedUserId }),
-//     FinancialModel.find({ userID: requestedUserId }),
-//     SocialInfoModel.find({ userID: requestedUserId }),
-//   ]);
-
-//   return {user, homeauto, medical, financial,socialInfo };
-// };
 
 
 export const getAllUserDataService = async (
@@ -397,11 +369,10 @@ export const getAllUserDataService = async (
   loggedInUserId: string
 ) => {
 
-  // ✅ FULL user data fetch
+  
   const user = await User.findById(requestedUserId);
   if (!user) throw new Error("USER_NOT_FOUND");
 
-  // ✅ access check
   const isOwnData =
     requestedUserId.toString() === loggedInUserId.toString();
 
@@ -411,7 +382,6 @@ export const getAllUserDataService = async (
 
   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
 
-  // ✅ all related data by SAME user _id
   const [homeauto, medical, financial, socialInfo] = await Promise.all([
     HomeAutoModel.find({ userID: user._id }),
     MedicalModel.find({ userID: user._id }),
@@ -420,7 +390,7 @@ export const getAllUserDataService = async (
   ]);
 
   return {
-    user,        // 👈 now FULL user object
+    user,       
     homeauto,
     medical,
     financial,
@@ -469,7 +439,7 @@ export const adminEmailService = async (req:Request) => {
 
 
 export const codeVerification = async (email: string, code: string) => {
-  // Check if user exists
+
   const user = await User.findOne({ email:email, otp: code });
   if (!user) {
     throw new Error("User not found");
