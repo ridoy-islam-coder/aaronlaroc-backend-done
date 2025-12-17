@@ -342,19 +342,20 @@ export const getUserFullProfileService = async (userId: string) => {
 
 
 export const getAllOwnUserDataService = async (loggedInUserId: string) => {
-  // Optional: check user exists
+
   const user = await User.findById(loggedInUserId);
   if (!user) throw new Error("USER_NOT_FOUND");
 
-  // Fetch all models in parallel
+
   const [homeauto, medical, financial,socialInfo] = await Promise.all([
     HomeAutoModel.find({ userID: loggedInUserId }),
     MedicalModel.find({ userID: loggedInUserId }),
     FinancialModel.find({ userID: loggedInUserId }),
     SocialInfoModel.find({ userID: loggedInUserId }),
+  
   ]);
 
-  return { homeauto, medical, financial,socialInfo };
+  return { user,homeauto, medical, financial,socialInfo };
 };
 
 
@@ -365,23 +366,21 @@ export const getAllUserDataService = async (
   requestedUserId: string,
   loggedInUserId: string
 ) => {
-  // 1️⃣ Find requested user
+
   const user = await User.findById(requestedUserId).select("proxysetId");
   if (!user) throw new Error("USER_NOT_FOUND");
 
-  // 2️⃣ Access check
-  // Mistake before: ObjectId/string mismatch could cause 403
-  // We must convert all IDs to string before comparison
+ 
   const isOwnData = requestedUserId.toString() === loggedInUserId.toString();
 
   const isProxyUser = user.proxysetId.some(
     (id: any) => id.toString() === loggedInUserId.toString()
   );
 
-  // 3️⃣ Deny access if neither own nor proxy
+
   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
 
-  // 4️⃣ Fetch all models in parallel
+ 
   const [homeauto, medical, financial,socialInfo] = await Promise.all([
     HomeAutoModel.find({ userID: requestedUserId }),
     MedicalModel.find({ userID: requestedUserId }),
@@ -389,7 +388,7 @@ export const getAllUserDataService = async (
     SocialInfoModel.find({ userID: requestedUserId }),
   ]);
 
-  return { homeauto, medical, financial,socialInfo };
+  return {user, homeauto, medical, financial,socialInfo };
 };
 
 
