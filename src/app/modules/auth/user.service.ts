@@ -10,6 +10,7 @@ import { FinancialModel } from "../financial-Information/financial.model";
 import { MedicalModel } from "../medical-Information/medical.model";
 import { HomeAutoModel } from "../homeAuto-Information/homeauto.model";
 import { Model } from "mongoose";
+import { SocialInfoModel } from "../social-Information/social.model";
 
 
 type PipelineStage = any;
@@ -340,20 +341,21 @@ export const getUserFullProfileService = async (userId: string) => {
 //proxysetId  data 
 
 
-// export const getAllOwnUserDataService = async (loggedInUserId: string) => {
-//   // Optional: check user exists
-//   const user = await User.findById(loggedInUserId);
-//   if (!user) throw new Error("USER_NOT_FOUND");
+export const getAllOwnUserDataService = async (loggedInUserId: string) => {
+  // Optional: check user exists
+  const user = await User.findById(loggedInUserId);
+  if (!user) throw new Error("USER_NOT_FOUND");
 
-//   // Fetch all models in parallel
-//   const [homeauto, medical, financial] = await Promise.all([
-//     HomeAutoModel.find({ userID: loggedInUserId }),
-//     MedicalModel.find({ userID: loggedInUserId }),
-//     FinancialModel.find({ userID: loggedInUserId }),
-//   ]);
+  // Fetch all models in parallel
+  const [homeauto, medical, financial,socialInfo] = await Promise.all([
+    HomeAutoModel.find({ userID: loggedInUserId }),
+    MedicalModel.find({ userID: loggedInUserId }),
+    FinancialModel.find({ userID: loggedInUserId }),
+    SocialInfoModel.find({ userID: loggedInUserId }),
+  ]);
 
-//   return { homeauto, medical, financial };
-// };
+  return { homeauto, medical, financial,socialInfo };
+};
 
 
 
@@ -380,13 +382,14 @@ export const getAllUserDataService = async (
   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
 
   // 4️⃣ Fetch all models in parallel
-  const [homeauto, medical, financial] = await Promise.all([
+  const [homeauto, medical, financial,socialInfo] = await Promise.all([
     HomeAutoModel.find({ userID: requestedUserId }),
     MedicalModel.find({ userID: requestedUserId }),
     FinancialModel.find({ userID: requestedUserId }),
+    SocialInfoModel.find({ userID: requestedUserId }),
   ]);
 
-  return { homeauto, medical, financial };
+  return { homeauto, medical, financial,socialInfo };
 };
 
 
