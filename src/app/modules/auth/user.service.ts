@@ -340,20 +340,63 @@ export const getUserFullProfileService = async (userId: string) => {
 //proxysetId  data 
 
 
-export const getAllOwnUserDataService = async (loggedInUserId: string) => {
-  // Optional: check user exists
-  const user = await User.findById(loggedInUserId);
+// export const getAllOwnUserDataService = async (loggedInUserId: string) => {
+//   // Optional: check user exists
+//   const user = await User.findById(loggedInUserId);
+//   if (!user) throw new Error("USER_NOT_FOUND");
+
+//   // Fetch all models in parallel
+//   const [homeauto, medical, financial] = await Promise.all([
+//     HomeAutoModel.find({ userID: loggedInUserId }),
+//     MedicalModel.find({ userID: loggedInUserId }),
+//     FinancialModel.find({ userID: loggedInUserId }),
+//   ]);
+
+//   return { homeauto, medical, financial };
+// };
+
+
+
+
+
+export const getAllUserDataService = async (
+  requestedUserId: string,
+  loggedInUserId: string
+) => {
+  // 1️⃣ Find requested user
+  const user = await User.findById(requestedUserId).select("proxysetId");
   if (!user) throw new Error("USER_NOT_FOUND");
 
-  // Fetch all models in parallel
+  // 2️⃣ Access check
+  const isOwnData = requestedUserId === loggedInUserId;
+  const isProxyUser = user.proxysetId.some(
+    (id) => id.toString() === loggedInUserId
+  );
+
+  if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
+
+  // 3️⃣ Fetch all model data in parallel
   const [homeauto, medical, financial] = await Promise.all([
-    HomeAutoModel.find({ userID: loggedInUserId }),
-    MedicalModel.find({ userID: loggedInUserId }),
-    FinancialModel.find({ userID: loggedInUserId }),
+    HomeAutoModel.find({ userID: requestedUserId }),
+    MedicalModel.find({ userID: requestedUserId }),
+    FinancialModel.find({ userID: requestedUserId }),
   ]);
 
   return { homeauto, medical, financial };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
