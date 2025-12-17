@@ -345,21 +345,22 @@ export const getUserSectionDataService = async (
   loggedInUserId: string,
   type: string
 ) => {
+  const user = await User.findById(userId).select("proxysetId");
+  if (!user) throw new Error("USER_NOT_FOUND");
 
-  let hasAccess = userId === loggedInUserId;
+  let hasAccess = false;
 
+  // Own data
+  if (loggedInUserId === userId) hasAccess = true;
 
-  if (!hasAccess) {
-    const user = await User.findById(userId).select("proxysetId");
-    if (!user) throw new Error("USER_NOT_FOUND");
-
-    hasAccess = user.proxysetId.some(
-      (id) => id.toString() === loggedInUserId
-    );
+  // Proxy access
+  if (!hasAccess && user.proxysetId.some(id => id.toString() === loggedInUserId)) {
+    hasAccess = true;
   }
 
   if (!hasAccess) throw new Error("ACCESS_DENIED");
 
+  // Select model
   let model: Model<any>;
   switch (type) {
     case "homeauto":
@@ -375,11 +376,9 @@ export const getUserSectionDataService = async (
       throw new Error("INVALID_TYPE");
   }
 
-  // 4️⃣ Fetch data
   const data = await model.find({ userID: userId });
   return data;
 };
-
 
 
 

@@ -40,7 +40,7 @@ router.post("/proxyset/:proxysetId",auth,ProxysetController)
 router.get("/getAllProxyset/:id",auth,getAllProxysetController)
 
 // GET all user data (HomeAuto + Medical + Financial)
-router.get("/user/:userId/all-data", auth, getUserSectionDataController);
+router.get("/user/:type/:userId", auth, getUserSectionDataController);
 
 
 

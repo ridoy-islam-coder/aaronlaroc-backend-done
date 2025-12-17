@@ -355,15 +355,8 @@ export const getUserSectionDataController = async (
   try {
     const { userId, type } = req.params;
     const loggedInUserId = req.user?.id;
-    
-       console.log("Requested userId:", userId);
-        console.log("Logged-in userId:", loggedInUserId);
 
-    const data = await getUserSectionDataService(
-      userId,
-      loggedInUserId,
-      type
-    );
+    const data = await getUserSectionDataService(userId, loggedInUserId, type);
 
     res.status(200).json({
       success: true,
@@ -371,27 +364,15 @@ export const getUserSectionDataController = async (
     });
   } catch (error: any) {
     if (error.message === "ACCESS_DENIED") {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied"
-      });
+      return res.status(403).json({ success: false, message: "Access denied" });
     }
     if (error.message === "USER_NOT_FOUND") {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
     if (error.message === "INVALID_TYPE") {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid data type"
-      });
+      return res.status(400).json({ success: false, message: "Invalid data type" });
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
