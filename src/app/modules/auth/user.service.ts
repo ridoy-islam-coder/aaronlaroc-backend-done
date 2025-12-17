@@ -362,37 +362,71 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
+// export const getAllUserDataService = async (
+//   requestedUserId: string,
+//   loggedInUserId: string
+// ) => {
+
+//   const user = await User.findById(requestedUserId).select("proxysetId");
+//   if (!user) throw new Error("USER_NOT_FOUND");
+
+ 
+//   const isOwnData = requestedUserId.toString() === loggedInUserId.toString();
+
+//   const isProxyUser = user.proxysetId.some(
+//     (id: any) => id.toString() === loggedInUserId.toString()
+//   );
+
+
+//   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
+
+ 
+//   const [homeauto, medical, financial,socialInfo] = await Promise.all([
+//     HomeAutoModel.find({ userID: requestedUserId }),
+//     MedicalModel.find({ userID: requestedUserId }),
+//     FinancialModel.find({ userID: requestedUserId }),
+//     SocialInfoModel.find({ userID: requestedUserId }),
+//   ]);
+
+//   return {user, homeauto, medical, financial,socialInfo };
+// };
+
+
 export const getAllUserDataService = async (
   requestedUserId: string,
   loggedInUserId: string
 ) => {
 
-  const user = await User.findById(requestedUserId).select("proxysetId");
+  // ✅ FULL user data fetch
+  const user = await User.findById(requestedUserId);
   if (!user) throw new Error("USER_NOT_FOUND");
 
- 
-  const isOwnData = requestedUserId.toString() === loggedInUserId.toString();
+  // ✅ access check
+  const isOwnData =
+    requestedUserId.toString() === loggedInUserId.toString();
 
   const isProxyUser = user.proxysetId.some(
     (id: any) => id.toString() === loggedInUserId.toString()
   );
 
-
   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
 
- 
-  const [homeauto, medical, financial,socialInfo] = await Promise.all([
-    HomeAutoModel.find({ userID: requestedUserId }),
-    MedicalModel.find({ userID: requestedUserId }),
-    FinancialModel.find({ userID: requestedUserId }),
-    SocialInfoModel.find({ userID: requestedUserId }),
+  // ✅ all related data by SAME user _id
+  const [homeauto, medical, financial, socialInfo] = await Promise.all([
+    HomeAutoModel.find({ userID: user._id }),
+    MedicalModel.find({ userID: user._id }),
+    FinancialModel.find({ userID: user._id }),
+    SocialInfoModel.find({ userID: user._id }),
   ]);
 
-  return {user, homeauto, medical, financial,socialInfo };
+  return {
+    user,        // 👈 now FULL user object
+    homeauto,
+    medical,
+    financial,
+    socialInfo
+  };
 };
-
-
-
 
 
 
