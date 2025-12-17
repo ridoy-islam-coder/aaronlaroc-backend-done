@@ -1,5 +1,5 @@
 import express from "express";
-import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, loginUser, ProfileUpdate, ProxysetController, registerUser, Searchbar, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, loginUser, ProfileUpdate, ProxysetController, registerUser, Searchbar, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -43,6 +43,9 @@ router.get("/getAllProxyset/:id",auth,getAllProxysetController)
 router.get("/proxyset-call-api/:userId", auth, getAllUserDataController);
 
 router.get("/alluser-data", auth, getAllOwnUserDataController);
+
+//all proxyset set user
+router.get("/alluser-set-data/",auth, getUsersWhoAddedMeAsProxyController);
 
 
 

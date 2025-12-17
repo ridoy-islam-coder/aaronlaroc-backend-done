@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminEmailService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,getUsersWhoAddedMeAsProxyService,LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 
 
 
@@ -372,7 +372,7 @@ export const getAllOwnUserDataController = async (req: Request, res: Response) =
 export const getAllUserDataController = async (req: Request, res: Response) => {
   try {
     const requestedUserId = req.params.userId;
-    const loggedInUserId = req.user?.id; // from auth middleware
+    const loggedInUserId = req.user?.id; 
 
     const data = await getAllUserDataService(requestedUserId, loggedInUserId);
 
@@ -381,18 +381,40 @@ export const getAllUserDataController = async (req: Request, res: Response) => {
       data
     });
   } catch (error: any) {
-    // 403 if not own user or not in proxysetId
+
     if (error.message === "ACCESS_DENIED") {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
 
-    // 404 if requested user not found
+
     if (error.message === "USER_NOT_FOUND") {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // 500 for other errors
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
+
+
+export const getUsersWhoAddedMeAsProxyController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const myUserId = req.user?.id;
+
+    const users = await getUsersWhoAddedMeAsProxyService(myUserId);
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};

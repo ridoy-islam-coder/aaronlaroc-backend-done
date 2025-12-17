@@ -409,6 +409,32 @@ export const getAllUserDataService = async (
 
 
 
+
+
+
+
+
+export const getUsersWhoAddedMeAsProxyService = async (
+  myUserId: string
+) => {
+  const users = await User.find({
+    proxysetId: myUserId
+  })
+  .select("_id firstName lastName email imgUrl role");
+
+  return users;
+};
+
+
+
+
+
+
+
+
+
+
+
 //admin routes
 
 
