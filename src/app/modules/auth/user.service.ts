@@ -368,14 +368,18 @@ export const getAllUserDataService = async (
   if (!user) throw new Error("USER_NOT_FOUND");
 
   // 2️⃣ Access check
-  const isOwnData = requestedUserId === loggedInUserId;
+  // Mistake before: ObjectId/string mismatch could cause 403
+  // We must convert all IDs to string before comparison
+  const isOwnData = requestedUserId.toString() === loggedInUserId.toString();
+
   const isProxyUser = user.proxysetId.some(
-    (id) => id.toString() === loggedInUserId
+    (id: any) => id.toString() === loggedInUserId.toString()
   );
 
+  // 3️⃣ Deny access if neither own nor proxy
   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
 
-  // 3️⃣ Fetch all model data in parallel
+  // 4️⃣ Fetch all models in parallel
   const [homeauto, medical, financial] = await Promise.all([
     HomeAutoModel.find({ userID: requestedUserId }),
     MedicalModel.find({ userID: requestedUserId }),
@@ -384,9 +388,6 @@ export const getAllUserDataService = async (
 
   return { homeauto, medical, financial };
 };
-
-
-
 
 
 
