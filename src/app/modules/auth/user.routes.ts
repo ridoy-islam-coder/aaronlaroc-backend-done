@@ -45,7 +45,7 @@ router.get("/proxyset-call-api/:userId", auth, getAllUserDataController);
 router.get("/alluser-data", auth, getAllOwnUserDataController);
 
 //all proxyset set user
-router.get("/alluser-set-data/",auth, getUsersWhoAddedMeAsProxyController);
+router.get("/alluser-set-data",auth, getUsersWhoAddedMeAsProxyController);
 
 
 
