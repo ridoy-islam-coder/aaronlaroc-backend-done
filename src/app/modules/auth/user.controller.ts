@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, codeVerification, deleteUserService, existingUser,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList, LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminEmailService, codeVerification, deleteUserService, existingUser,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList, getUserSectionDataService, LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 
 
 
@@ -334,3 +334,61 @@ export class UserAnalysisController {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+//proxysetId  data 
+
+
+export const getUserSectionDataController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { userId, type } = req.params;
+    const loggedInUserId = req.user?.id;
+
+    const data = await getUserSectionDataService(
+      userId,
+      loggedInUserId,
+      type
+    );
+
+    res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error: any) {
+    if (error.message === "ACCESS_DENIED") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied"
+      });
+    }
+    if (error.message === "USER_NOT_FOUND") {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+    if (error.message === "INVALID_TYPE") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data type"
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};

@@ -2,10 +2,14 @@ import { User } from "./user.model";
 import bcrypt from "bcryptjs";
  import jwt from "jsonwebtoken";
 import { config } from './../../config/index';
-import { NextFunction, Request } from "express";
+import {  Request } from "express";
 import mongoose, { Types } from 'mongoose';
 import { SendEmail } from "../../../helpers/emailHelper";
 import { ReportModel } from "../report-Information/report.model";
+import { FinancialModel } from "../financial-Information/financial.model";
+import { MedicalModel } from "../medical-Information/medical.model";
+import { HomeAutoModel } from "../homeAuto-Information/homeauto.model";
+import { Model } from "mongoose";
 
 
 type PipelineStage = any;
@@ -268,19 +272,6 @@ export const getProxysetData = async (userId: string) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const getUserFullProfileService = async (userId: string) => {
   const result = await User.aggregate([
     {
@@ -318,7 +309,10 @@ export const getUserFullProfileService = async (userId: string) => {
         foreignField: "userID",
         as: "medicalsInfo",
       },
+      
     },
+    
+    
 
 
     {
@@ -341,15 +335,48 @@ export const getUserFullProfileService = async (userId: string) => {
 
 
 
+//proxysetId  data 
 
 
+export const getUserSectionDataService = async (
+  userId: string,
+  loggedInUserId: string,
+  type: string
+) => {
+
+  let hasAccess = userId === loggedInUserId;
 
 
+  if (!hasAccess) {
+    const user = await User.findById(userId).select("proxysetId");
+    if (!user) throw new Error("USER_NOT_FOUND");
 
+    hasAccess = user.proxysetId.some(
+      (id) => id.toString() === loggedInUserId
+    );
+  }
 
+  if (!hasAccess) throw new Error("ACCESS_DENIED");
 
+  let model: Model<any>;
+  switch (type) {
+    case "homeauto":
+      model = HomeAutoModel;
+      break;
+    case "medical":
+      model = MedicalModel;
+      break;
+    case "financial":
+      model = FinancialModel;
+      break;
+    default:
+      throw new Error("INVALID_TYPE");
+  }
 
-
+  // 4️⃣ Fetch data
+  const data = await model.find({ userID: userId });
+  return data;
+};
 
 
 
