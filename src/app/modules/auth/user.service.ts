@@ -340,44 +340,19 @@ export const getUserFullProfileService = async (userId: string) => {
 //proxysetId  data 
 
 
-export const getUserSectionDataService = async (
-  userId: string,
-  loggedInUserId: string,
-  type: string
-) => {
-  const user = await User.findById(userId).select("proxysetId");
+export const getAllOwnUserDataService = async (loggedInUserId: string) => {
+  // Optional: check user exists
+  const user = await User.findById(loggedInUserId);
   if (!user) throw new Error("USER_NOT_FOUND");
 
-  let hasAccess = false;
+  // Fetch all models in parallel
+  const [homeauto, medical, financial] = await Promise.all([
+    HomeAutoModel.find({ userID: loggedInUserId }),
+    MedicalModel.find({ userID: loggedInUserId }),
+    FinancialModel.find({ userID: loggedInUserId }),
+  ]);
 
-  // Own data
-  if (loggedInUserId === userId) hasAccess = true;
-
-  // Proxy access
-  if (!hasAccess && user.proxysetId.some(id => id.toString() === loggedInUserId)) {
-    hasAccess = true;
-  }
-
-  if (!hasAccess) throw new Error("ACCESS_DENIED");
-
-  // Select model
-  let model: Model<any>;
-  switch (type) {
-    case "homeauto":
-      model = HomeAutoModel;
-      break;
-    case "medical":
-      model = MedicalModel;
-      break;
-    case "financial":
-      model = FinancialModel;
-      break;
-    default:
-      throw new Error("INVALID_TYPE");
-  }
-
-  const data = await model.find({ userID: userId });
-  return data;
+  return { homeauto, medical, financial };
 };
 
 
