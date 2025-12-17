@@ -46,7 +46,7 @@ const userSchema =  new Schema<IUser>({
   phoneNumber: {
     type: String,
     required: true,
-    match: /^\+[1-9]\d{1,14}$/,
+    // match: /^\+[1-9]\d{1,14}$/,
   },
    otp:{type:String},
       imgUrl: {

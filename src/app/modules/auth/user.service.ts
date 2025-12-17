@@ -173,6 +173,8 @@ export const ProxysetService = async (req: Request) => {
     const userId = req.user?.id; 
     const ProxysetUserId = req.params.proxysetId;
 
+ 
+
     if (!userId || !ProxysetUserId || !mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(ProxysetUserId)) {
       return { status: 'failed', message: 'Invalid user or followed user ID' };
     }
@@ -187,7 +189,7 @@ export const ProxysetService = async (req: Request) => {
     if (!user) {
       return { status: 'failed', message: 'User not found' };
     }
-
+  console.log("ProxysetId:", user?.proxysetId);
     const followedUser = await User.findById(ProxysetUserIdObjectId);
     if (!followedUser) {
       return { status: 'failed', message: "Followed user not found" };

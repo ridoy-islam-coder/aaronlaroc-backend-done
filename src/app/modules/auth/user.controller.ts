@@ -355,6 +355,9 @@ export const getUserSectionDataController = async (
   try {
     const { userId, type } = req.params;
     const loggedInUserId = req.user?.id;
+    
+       console.log("Requested userId:", userId);
+        console.log("Logged-in userId:", loggedInUserId);
 
     const data = await getUserSectionDataService(
       userId,
