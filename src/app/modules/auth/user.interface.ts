@@ -20,6 +20,7 @@ export interface IUser extends Document {
     otp: string;
     password: string;
     imgUrl: string;
+    stripeCustomerId:string;
     role: Role;
     followers: Types.ObjectId[];  
     proxysetId: Types.ObjectId[];

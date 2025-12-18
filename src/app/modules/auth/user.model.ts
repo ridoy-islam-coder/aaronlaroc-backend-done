@@ -55,6 +55,10 @@ const userSchema =  new Schema<IUser>({
     },
    
      proxysetId: [{ type: Types.ObjectId, ref: "User" }],
+       stripeCustomerId: {
+               type: String,
+               default: '',
+          },
     role: {
         type: String,
         enum: Object.values(Role),
