@@ -1,5 +1,5 @@
 import express from "express";
-import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, loginUser, ProfileUpdate, ProxysetController, registerUser, Searchbar, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, loginUser, ProfileUpdate, ProxysetController, registerUser,  searchUsers, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -24,7 +24,7 @@ router.put("/ProfileUpdate",auth,ProfileUpdate)
 router.get("/GetAllProfile",auth,GetAllProfile)
 
 // Get All User Profile
-router.post("/Searchbar/:searchTerm",auth,Searchbar)
+router.get('/users/search', searchUsers);
 
 router.get("/alldata-percentage/:userId",auth, alldatapercentage);
 

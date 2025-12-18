@@ -1,39 +1,16 @@
+import { Model, Types } from 'mongoose';
 
-import { Types } from "mongoose";
+export type ISubscription = {
+     customerId: string;
+     price: number;
+     userId: Types.ObjectId;
+     package: Types.ObjectId;
+     trxId: string;
+     remaining: number;
+     subscriptionId: string;
+     status: 'expired' | 'active' | 'cancel';
+     currentPeriodStart: string;
+     currentPeriodEnd: string;
+};
 
-
-
-
-
-
-export interface ISubscriptions {
-  _id?: Types.ObjectId;
-
-  userID: Types.ObjectId;
-
-  stripeCustomerId: string;
-
-  stripeSubscriptionId: string;
-
-  stripePriceId: string;
-
-  planName: string;
-
-  amount: number;
-
-  interval: "month" | "year";
-
-  status:
-    | "active"
-    | "canceled"
-    | "incomplete"
-    | "past_due"
-    | "unpaid"
-    | "trialing";
-
-  currentPeriodStart?: Date;
-  currentPeriodEnd?: Date;
-
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+export type SubscriptionModel = Model<ISubscription, Record<string, unknown>>;

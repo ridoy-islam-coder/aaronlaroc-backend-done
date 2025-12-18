@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,getUsersWhoAddedMeAsProxyService,LoginInUser, profileupdateService, ProxysetService, Searchbarservice,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminEmailService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,getUsersWhoAddedMeAsProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 
 
 
@@ -86,25 +86,25 @@ export const GetAllProfile=async (req:Request,res:Response) => {
 }
 
 
-export const  Searchbar=async (req:Request,res:Response)=> {
-   const { searchTerm } = req.params;
+export const searchUsers = async (req: Request, res: Response) => {
+    const searchTerm = req.query.searchTerm as string; // query param ব্যবহার
 
-
-  if (!searchTerm || typeof searchTerm !== 'string') {
-    return res.status(400).json({ message: 'Search term is required and must be a string' });
-  }
-
-
-  
-    const result = await Searchbarservice(searchTerm);
-    
-    if (!Array.isArray(result.data) || result.data.length === 0) {
-      return res.status(404).json({ message: 'No users found' });
+    if (!searchTerm || typeof searchTerm !== 'string') {
+        return res.status(400).json({ message: 'Search term is required and must be a string' });
     }
 
-    return res.status(200).json(result);
-}
+    try {
+        const result = await searchUsersService(searchTerm);
 
+        if (!Array.isArray(result.data) || result.data.length === 0) {
+            return res.status(404).json({ message: 'No users found' });
+        }
+
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error', error });
+    }
+};
 
 
 
