@@ -6,7 +6,7 @@ export const config = {
   port: process.env.PORT || 3000,   
   db_uri: process.env.MongoDB_URI,
   jwt_secret: process.env.JWT_SECRET,
-  stripe_secret_key: process.env.STRIPE_API_KEY
+  stripe_secret_key:process.env.STRIPE_SECRET_KEY,
  
 };
 
