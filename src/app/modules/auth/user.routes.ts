@@ -23,8 +23,8 @@ router.put("/ProfileUpdate",auth,ProfileUpdate)
 // Get All User Profile
 router.get("/GetAllProfile",auth,GetAllProfile)
 
-// Get All User Profile
-router.get('/users/search', searchUsers);
+// GET request route for search
+router.get("/search/:searchTerm", auth, searchUsers);
 
 router.get("/alldata-percentage/:userId",auth, alldatapercentage);
 
