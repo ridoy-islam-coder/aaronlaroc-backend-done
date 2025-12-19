@@ -86,24 +86,29 @@ export const GetAllProfile=async (req:Request,res:Response) => {
 }
 
 
-export const searchUsers = async (req: Request, res: Response) => {
-    const searchTerm = req.query.searchTerm as string; // query param ব্যবহার
 
-    if (!searchTerm || typeof searchTerm !== 'string') {
-        return res.status(400).json({ message: 'Search term is required and must be a string' });
+export const searchUsersController = async (req: Request, res: Response) => {
+  const searchTerm = req.query.searchTerm as string;
+
+  if (!searchTerm || typeof searchTerm !== "string") {
+    return res.status(400).json({ message: "Search term is required and must be a string" });
+  }
+
+  try {
+    const users = await searchUsersService(searchTerm);
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users found" });
     }
 
-    try {
-        const result = await searchUsersService(searchTerm);
-
-        if (!Array.isArray(result.data) || result.data.length === 0) {
-            return res.status(404).json({ message: 'No users found' });
-        }
-
-        return res.status(200).json(result);
-    } catch (error) {
-        return res.status(500).json({ message: 'Server error', error });
-    }
+    return res.status(200).json({
+      status: "success",
+      message: "Search results successfully fetched",
+      data: users,
+    });
+  } catch (error) {
+    return res.status(500).json({ status: "failed", data: error });
+  }
 };
 
 

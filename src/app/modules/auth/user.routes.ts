@@ -1,5 +1,5 @@
 import express from "express";
-import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, loginUser, ProfileUpdate, ProxysetController, registerUser,  searchUsers, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -24,7 +24,7 @@ router.put("/ProfileUpdate",auth,ProfileUpdate)
 router.get("/GetAllProfile",auth,GetAllProfile)
 
 // GET request route for search
-router.get("/search/:searchTerm", auth, searchUsers);
+router.get("/search", auth, searchUsersController);
 
 router.get("/alldata-percentage/:userId",auth, alldatapercentage);
 

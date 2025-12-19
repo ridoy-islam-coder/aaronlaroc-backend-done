@@ -125,27 +125,17 @@ export const getallUsers = async () => {
 
 
 export const searchUsersService = async (searchTerm: string) => {
-    try {
-        const users = await User.find(
-            {
-                $or: [
-                    { email: { $regex: searchTerm, $options: 'i' } },
-                    { phoneNumber: { $regex: searchTerm, $options: 'i' } },
-                    { firstName: { $regex: searchTerm, $options: 'i' } },
-                    { lastName: { $regex: searchTerm, $options: 'i' } },
-                ]
-            },
-            { _id: 1, firstName: 1, lastName: 1, email: 1, phoneNumber: 1, imgUrl: 1 } // hide sensitive fields
-        );
+  const users = await User.find(
+    {
+      $or: [
+        { email: { $regex: searchTerm, $options: "i" } },
+        { phoneNumber: { $regex: searchTerm, $options: "i" } },
+      ],
+    },
+    { _id: 1, firstName: 1, lastName: 1, email: 1, phoneNumber: 1 }
+  );
 
-        return {
-            status: 'success',
-            message: 'Search results successfully fetched',
-            data: users,
-        };
-    } catch (error) {
-        return { status: 'failed', data: error };
-    }
+  return users;
 };
 
 
