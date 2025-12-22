@@ -163,6 +163,8 @@ const subscriptionsFromDB = async (query: Record<string, unknown>): Promise<ISub
           throw new Error('Failed to fetch subscriptions');
      }
 };
+
+
 const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
      const isExistPackage = await Package.findOne({
           _id: packageId,
