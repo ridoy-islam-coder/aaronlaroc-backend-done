@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,getUsersWhoAddedMeAsProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminEmailService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { ProxyUser } from "./user.interface";
 
 
 
@@ -420,6 +421,50 @@ export const getUsersWhoAddedMeAsProxyController = async (
     res.status(500).json({
       success: false,
       message: "Server error"
+    });
+  }
+};
+
+
+
+
+
+
+export const getUsersWhoSetMyProxy = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    // Postman friendly: query param
+    const myUserId = req.query.userId as string;
+
+    if (!myUserId) {
+      res.status(400).json({
+        status: "error",
+        message: "userId is required"
+      });
+      return;
+    }
+
+    const result = await getUsersWhoSetMyProxyService(myUserId);
+
+    if (!result.status) {
+      res.status(500).json({
+        status: "error",
+        message: "Failed to fetch users"
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: "success",
+      total: result.data.length,
+      data: result.data as ProxyUser[]
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: "error",
+      message: err.message
     });
   }
 };

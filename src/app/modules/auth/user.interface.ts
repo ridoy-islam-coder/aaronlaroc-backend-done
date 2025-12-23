@@ -22,9 +22,20 @@ export interface IUser extends Document {
     imgUrl: string;
     stripeCustomerId:string;
     role: Role;
-    followers: Types.ObjectId[];  
     proxysetId: Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
     
 }
+
+
+// types/proxyUser.types.ts
+export type ProxyUser = {
+  _id: string;
+  email: string;
+};
+
+export type ProxyUserResponse = {
+  status: boolean;
+  data: ProxyUser[];
+};

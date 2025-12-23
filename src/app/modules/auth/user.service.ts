@@ -9,8 +9,9 @@ import { ReportModel } from "../report-Information/report.model";
 import { FinancialModel } from "../financial-Information/financial.model";
 import { MedicalModel } from "../medical-Information/medical.model";
 import { HomeAutoModel } from "../homeAuto-Information/homeauto.model";
-import { Model } from "mongoose";
+
 import { SocialInfoModel } from "../social-Information/social.model";
+import { ProxyUser, ProxyUserResponse } from "./user.interface";
 
 
 type PipelineStage = any;
@@ -784,3 +785,34 @@ export class UserAnalysisService {
     return result;
   }
 }
+
+
+
+export const getUsersWhoSetMyProxyService = async (
+  myUserId: string
+): Promise<ProxyUserResponse> => {
+  try {
+    const objectId = new Types.ObjectId(myUserId);
+
+    const users = await User.find(
+      { proxysetId: objectId },
+      { _id: 1, email: 1 } // only _id and email
+    ).sort({ createdAt: -1 });
+
+    // 🔹 Map ObjectId to string
+    const proxyUsers: ProxyUser[] = users.map(user => ({
+      _id: user._id.toString(),
+      email: user.email
+    }));
+
+    return {
+      status: true,
+      data: proxyUsers
+    };
+  } catch (error) {
+    return {
+      status: false,
+      data: []
+    };
+  }
+};

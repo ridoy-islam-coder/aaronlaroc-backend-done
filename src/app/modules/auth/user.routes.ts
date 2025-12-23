@@ -1,5 +1,5 @@
 import express from "express";
-import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { AdminEmail, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -46,6 +46,11 @@ router.get("/alluser-data", auth, getAllOwnUserDataController);
 
 //all proxyset set user
 router.get("/alluser-set-data",auth, getUsersWhoAddedMeAsProxyController);
+
+
+//all proxyset set user
+// GET /api/users/my-proxy-users?userId=...
+router.get("/my-proxy-users",auth, getUsersWhoSetMyProxy);
 
 
 
