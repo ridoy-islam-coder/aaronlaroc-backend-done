@@ -788,6 +788,7 @@ export class UserAnalysisService {
 
 
 
+
 export const getUsersWhoSetMyProxyService = async (
   myUserId: string
 ): Promise<ProxyUserResponse> => {
@@ -796,10 +797,9 @@ export const getUsersWhoSetMyProxyService = async (
 
     const users = await User.find(
       { proxysetId: objectId },
-      { _id: 1, email: 1 } // only _id and email
+      { _id: 1, email: 1 }
     ).sort({ createdAt: -1 });
 
-    // 🔹 Map ObjectId to string
     const proxyUsers: ProxyUser[] = users.map(user => ({
       _id: user._id.toString(),
       email: user.email

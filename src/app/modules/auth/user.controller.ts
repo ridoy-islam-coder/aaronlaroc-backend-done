@@ -428,20 +428,17 @@ export const getUsersWhoAddedMeAsProxyController = async (
 
 
 
-
-
 export const getUsersWhoSetMyProxy = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    // Postman friendly: query param
-    const myUserId = req.query.userId as string;
+    const myUserId = req.user?.id;
 
     if (!myUserId) {
-      res.status(400).json({
+      res.status(401).json({
         status: "error",
-        message: "userId is required"
+        message: "Unauthorized"
       });
       return;
     }
@@ -459,8 +456,10 @@ export const getUsersWhoSetMyProxy = async (
     res.status(200).json({
       status: "success",
       total: result.data.length,
-      data: result.data as ProxyUser[]
+      data: result.data
     });
+
+    // এখানে আর return করা হয়নি → void safe
   } catch (err: any) {
     res.status(500).json({
       status: "error",
@@ -468,3 +467,5 @@ export const getUsersWhoSetMyProxy = async (
     });
   }
 };
+
+
