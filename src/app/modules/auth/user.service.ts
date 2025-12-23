@@ -797,12 +797,15 @@ export const getUsersWhoSetMyProxyService = async (
 
     const users = await User.find(
       { proxysetId: objectId },
-      { _id: 1, email: 1 }
+      { _id: 1, email: 1,phoneNumber:1 ,firstName:1,lastName:1}
     ).sort({ createdAt: -1 });
 
     const proxyUsers: ProxyUser[] = users.map(user => ({
       _id: user._id.toString(),
-      email: user.email
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      firstName: user.firstName,
+      lastName: user.lastName,
     }));
 
     return {
