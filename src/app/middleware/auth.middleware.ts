@@ -26,7 +26,8 @@ export const auth= async(req:AuthenticatedRequest, res:Response, next:NextFuncti
     }
     req.user = {
         id: user._id,
-        role: user.role
+        role: user.role,
+        name: `${user.firstName} ${user.lastName}`.trim()
     }
     next();
   } catch (error) {
