@@ -6,6 +6,7 @@ import { Package } from '../package/package.model';
 import { ISubscription } from './subscriptions.interface';
 import { Subscription } from './subscriptions.model';
 import { StatusCodes } from 'http-status-codes';
+import Stripe from 'stripe';
 // import { ISubscription } from './subscription.interface';
 // import { Subscription } from './subscription.model';
 // import stripe from '../../../config/stripe';
@@ -343,10 +344,79 @@ const cancelSubscriptionToDB = async (userId: string) => {
 
      return { success: true, message: 'Subscription canceled successfully' };
 };
-const successMessage = async (id: string) => {
-     const session = await stripe.checkout.sessions.retrieve(id);
-     return session;
+// const successMessage = async (id: string) => {
+//      const session = await stripe.checkout.sessions.retrieve(id);
+//      return session;
+// };
+
+
+
+// Save subscription to MongoDB after Stripe checkout success
+export const saveSubscriptionToDB = async (userId: string, sessionId: string) => {
+    // 1️⃣ Retrieve session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (!session || session.payment_status !== 'paid') {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Payment not completed');
+    }
+
+    // 2️⃣ Check subscription field exists
+    if (!session.subscription) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
+    }
+
+    // 3️⃣ Get full Stripe subscription object
+    let stripeSubscription: any;
+    if (typeof session.subscription === 'string') {
+        stripeSubscription = await stripe.subscriptions.retrieve(session.subscription) as any;
+    } else {
+        stripeSubscription = session.subscription as any;
+    }
+
+    // 4️⃣ Retrieve package info from DB
+    const packageDoc = await Package.findById(session.metadata?.subscriptionId);
+    if (!packageDoc) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
+    }
+
+    // 5️⃣ Calculate remaining days based on package duration
+    let remainingDays = 0;
+    switch (packageDoc.duration) {
+        case '1 month':
+            remainingDays = 30;
+            break;
+        case '3 months':
+            remainingDays = 90;
+            break;
+        case '6 months':
+            remainingDays = 180;
+            break;
+        case '1 year':
+            remainingDays = 365;
+            break;
+    }
+
+    // 6️⃣ Save subscription to MongoDB
+    const subscription = await Subscription.create({
+        userId,
+        package: packageDoc._id,
+        price: packageDoc.price,
+        subscriptionId: stripeSubscription.id,
+        currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+        currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+        remaining: remainingDays,
+        status: 'active',
+        customerId: stripeSubscription.customer,
+    });
+
+    return subscription;
 };
+
+
+
+
+
+
 export const SubscriptionService = {
      subscriptionDetailsFromDB,
      subscriptionsFromDB,
@@ -354,5 +424,6 @@ export const SubscriptionService = {
      createSubscriptionCheckoutSession,
      upgradeSubscriptionToDB,
      cancelSubscriptionToDB,
-     successMessage,
+     // successMessage,
+     saveSubscriptionToDB,
 };

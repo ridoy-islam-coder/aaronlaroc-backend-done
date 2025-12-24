@@ -1,7 +1,8 @@
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { StatusCodes } from 'http-status-codes';
-import { SubscriptionService } from "./subscriptions.service";
+import { saveSubscriptionToDB, SubscriptionService } from "./subscriptions.service";
+import AppError from "../../../errors/AppError";
 
 const subscriptions = catchAsync(async (req, res) => {
      const result = await SubscriptionService.subscriptionsFromDB(req.query);
@@ -66,21 +67,82 @@ const updateSubscription = catchAsync(async (req, res) => {
           },
      });
 });
-const orderSuccess = catchAsync(async (req, res) => {
-     const sessionId = req.query.session_id as string;
-     const session = await SubscriptionService.successMessage(sessionId);
-     res.render('success', { session });
-});
+
+
+// const orderSuccess = catchAsync(async (req, res) => {
+//      const sessionId = req.query.session_id as string;
+//      const session = await SubscriptionService.successMessage(sessionId);
+//      res.render('success', { session });
+// });
+
+
+
+
 // Assuming you have OrderServices imported properly
 const orderCancel = catchAsync(async (req, res) => {
      res.render('cancel');
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Controller for Stripe checkout success
+export const checkoutSuccessController = catchAsync(async (req, res ) => {
+    const sessionId = req.query.session_id as string;
+    const userId = req.user?.id;
+
+    if (!sessionId) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Session ID is required');
+    }
+
+    if (!userId) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
+    }
+
+    // Save subscription in DB
+    const subscription = await saveSubscriptionToDB(userId, sessionId);
+
+    // Send response
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: 'Subscription created successfully',
+        data: subscription,
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const SubscriptionController = {
      subscriptions,
      subscriptionDetails,
      createCheckoutSession,
      updateSubscription,
      cancelSubscription,
-     orderSuccess,
+     // orderSuccess,
      orderCancel,
 };
