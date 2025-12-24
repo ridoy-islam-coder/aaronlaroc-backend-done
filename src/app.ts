@@ -10,6 +10,7 @@ import { socialRoutes } from './app/modules/social-Information/social.routes';
 import { homeautoRoutes } from './app/modules/homeAuto-Information/homeauto.routes';
 import { ReportRoutes } from './app/modules/report-Information/report.routes';
 import { PackageRoutes } from './app/modules/package/package.routes';
+import { SubscriptionRoutes } from './app/modules/subscriptions-information/subscriptions.routes';
 
 
 
@@ -45,6 +46,10 @@ app.use("/api/v1",socialRoutes)
 app.use("/api/v1",homeautoRoutes)
 app.use("/api/v1",ReportRoutes)
 app.use("/api/v1",PackageRoutes)
+app.use("/api/v1",SubscriptionRoutes)
+
+
+
 
 
 
