@@ -165,42 +165,114 @@ const subscriptionsFromDB = async (query: Record<string, unknown>): Promise<ISub
 };
 
 
-const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
-     const isExistPackage = await Package.findOne({
-          _id: packageId,
-          status: 'active',
-     });
-     if (!isExistPackage) {
-          throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
-     }
-     const user = await User.findById(userId).select('+stripeCustomerId');
-     if (!user || !user.stripeCustomerId) {
-          throw new AppError(StatusCodes.NOT_FOUND, 'User or Stripe Customer ID not found');
-     }
+// const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
+//      const isExistPackage = await Package.findOne({
+//           _id: packageId,
+//           status: 'active',
+//      });
+//      if (!isExistPackage) {
+//           throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
+//      }
+//      const user = await User.findById(userId).select('+stripeCustomerId');
+//      if (!user || !user.stripeCustomerId) {
+//           throw new AppError(StatusCodes.NOT_FOUND, 'User or Stripe Customer ID not found');
+//      }
 
-     // Convert Mongoose String types to primitive strings
-     const session = await stripe.checkout.sessions.create({
-          mode: 'subscription',
-          customer: String(user.stripeCustomerId),
-          line_items: [
-               {
-                    price: String(isExistPackage.priceId),
-                    quantity: 1,
-               },
-          ],
-          metadata: {
-               userId: String(userId),
-               subscriptionId: String(isExistPackage._id),
-          },
-          // your backend url for success and cancel
-          success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${config.backend_url}/subscription/cancel`,
-     });
-     return {
-          url: session.url,
-          sessionId: session.id,
-     };
+//      // Convert Mongoose String types to primitive strings
+//      const session = await stripe.checkout.sessions.create({
+//           mode: 'subscription',
+//           customer: String(user.stripeCustomerId),
+//           line_items: [
+//                {
+//                     price: String(isExistPackage.priceId),
+//                     quantity: 1,
+//                },
+//           ],
+//           metadata: {
+//                userId: String(userId),
+//                subscriptionId: String(isExistPackage._id),
+//           },
+//           // your backend url for success and cancel
+//           success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+//           cancel_url: `${config.backend_url}/subscription/cancel`,
+//      });
+//      return {
+//           url: session.url,
+//           sessionId: session.id,
+//      };
+// };
+
+
+
+
+
+
+export const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
+    // 1️⃣ Check if the package exists and is active
+    const isExistPackage = await Package.findOne({
+        _id: packageId,
+        status: 'active',
+    });
+
+    if (!isExistPackage) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
+    }
+
+    // 2️⃣ Find the user
+    let user = await User.findById(userId).select('+stripeCustomerId');
+    if (!user) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+
+    // 3️⃣ If stripeCustomerId is missing, create it
+    if (!user.stripeCustomerId) {
+        const customer = await stripe.customers.create({
+            email: user.email,
+            name: `${user.firstName || ''} ${user.lastName || ''}`,
+        });
+
+        user.stripeCustomerId = customer.id;
+        await user.save();
+    }
+
+    // 4️⃣ Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+        mode: 'subscription',
+        customer: String(user.stripeCustomerId),
+        line_items: [
+            {
+                price: String(isExistPackage.priceId),
+                quantity: 1,
+            },
+        ],
+        metadata: {
+            userId: String(userId),
+            subscriptionId: String(isExistPackage._id),
+        },
+        success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.backend_url}/subscription/cancel`,
+    });
+
+    // 5️⃣ Return session info
+    return {
+        url: session.url,
+        sessionId: session.id,
+    };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const upgradeSubscriptionToDB = async (userId: string, packageId: string) => {
      const activeSubscription = await Subscription.findOne({
