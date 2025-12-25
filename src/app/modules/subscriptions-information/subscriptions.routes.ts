@@ -1,5 +1,5 @@
 import express from 'express';
-import { auth } from '../../middleware/auth.middleware';
+import { auth, isAdmin } from '../../middleware/auth.middleware';
 import { checkoutSuccessController, SubscriptionController } from './subscriptions.controller';
 
 const router = express.Router();
@@ -13,5 +13,9 @@ router.get('/cancel', SubscriptionController.orderCancel);
 router.post('/create-checkout-session/:id', auth, SubscriptionController.createCheckoutSession);
 router.post('/update/:id', auth, SubscriptionController.updateSubscription);
 router.delete('/subscription/cancel/:id', auth, SubscriptionController.cancelSubscription);
+router.get('/earnings/monthly',auth,isAdmin,SubscriptionController.getMonthlyEarnings);
+
+
+
 
 export const SubscriptionRoutes = router;

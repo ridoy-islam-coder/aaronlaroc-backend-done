@@ -415,6 +415,49 @@ export const saveSubscriptionToDB = async (userId: string, sessionId: string) =>
 
 
 
+const getMonthlyEarningsStats = async () => {
+  const stats = await Subscription.aggregate([
+    {
+      $match: {
+        status: 'active' // বা 'paid'
+      }
+    },
+    {
+      $group: {
+        _id: { $month: '$createdAt' },
+        totalEarnings: { $sum: '$amount' }
+      }
+    },
+    {
+      $sort: { '_id': 1 }
+    }
+  ]);
+
+  return stats.map(item => ({
+    month: item._id,
+    total: item.totalEarnings
+  }));
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 export const SubscriptionService = {
@@ -426,4 +469,5 @@ export const SubscriptionService = {
      cancelSubscriptionToDB,
      // successMessage,
      saveSubscriptionToDB,
+     getMonthlyEarningsStats,
 };

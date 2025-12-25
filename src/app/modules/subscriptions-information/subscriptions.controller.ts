@@ -129,7 +129,16 @@ export const checkoutSuccessController = catchAsync(async (req, res ) => {
 
 
 
+const getMonthlyEarnings = catchAsync(async (req, res) => {
+  const result = await SubscriptionService.getMonthlyEarningsStats();
 
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Monthly earnings fetched successfully',
+    data: result,
+  });
+});
 
 
 
@@ -145,4 +154,5 @@ export const SubscriptionController = {
      cancelSubscription,
      // orderSuccess,
      orderCancel,
+     getMonthlyEarnings,
 };
