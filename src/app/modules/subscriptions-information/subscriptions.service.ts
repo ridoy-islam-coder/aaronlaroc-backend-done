@@ -407,6 +407,10 @@ const cancelSubscriptionToDB = async (userId: string) => {
 // };
 
 
+interface MyStripeSubscription extends Stripe.Subscription {
+    current_period_start?: number;
+    current_period_end?: number;
+}
 
 export const saveSubscriptionToDB = async (sessionId: string) => {
     // 1️⃣ Retrieve checkout session
@@ -433,7 +437,7 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
         ? await stripe.subscriptions.retrieve(session.subscription)
         : session.subscription;
 
-    const stripeSubscription = stripeSubscriptionRaw as unknown as Stripe.Subscription;
+    const stripeSubscription = stripeSubscriptionRaw as unknown as MyStripeSubscription;
 
     // 4️⃣ Retrieve package
     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
@@ -448,7 +452,7 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
     };
     const remainingDays = durationMap[packageDoc.duration] || 30;
 
-    // 6️⃣ Convert Stripe timestamps to Date
+    // 6️⃣ Convert Stripe timestamps to Date safely
     const currentPeriodStart = stripeSubscription.current_period_start
         ? new Date(stripeSubscription.current_period_start * 1000)
         : null;
@@ -472,7 +476,6 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
 
     return subscription;
 };
-
 
 
 
