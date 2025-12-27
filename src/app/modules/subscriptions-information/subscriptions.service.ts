@@ -229,7 +229,7 @@ const subscriptionsFromDB = async (query: Record<string, unknown>): Promise<ISub
 
 
 
-export const checkoutSuccessController = async (userId: string, packageId: string) => {
+export const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
     // 1️⃣ Check package exists
     const packageDoc = await Package.findOne({ _id: packageId, status: 'active' });
     if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
