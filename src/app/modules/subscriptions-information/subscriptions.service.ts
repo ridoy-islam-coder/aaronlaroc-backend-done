@@ -7,7 +7,7 @@ import { Package } from '../package/package.model';
 import { ISubscription } from './subscriptions.interface';
 import { Subscription } from './subscriptions.model';
 import { StatusCodes } from 'http-status-codes';
-
+import { Types } from 'mongoose'; 
 // import { ISubscription } from './subscription.interface';
 // import { Subscription } from './subscription.model';
 // import stripe from '../../../config/stripe';
@@ -167,105 +167,102 @@ const subscriptionsFromDB = async (query: Record<string, unknown>): Promise<ISub
 };
 
 
-// const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
-//      const isExistPackage = await Package.findOne({
-//           _id: packageId,
-//           status: 'active',
-//      });
-//      if (!isExistPackage) {
-//           throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
-//      }
-//      const user = await User.findById(userId).select('+stripeCustomerId');
-//      if (!user || !user.stripeCustomerId) {
-//           throw new AppError(StatusCodes.NOT_FOUND, 'User or Stripe Customer ID not found');
-//      }
 
-//      // Convert Mongoose String types to primitive strings
-//      const session = await stripe.checkout.sessions.create({
-//           mode: 'subscription',
-//           customer: String(user.stripeCustomerId),
-//           line_items: [
-//                {
-//                     price: String(isExistPackage.priceId),
-//                     quantity: 1,
-//                },
-//           ],
-//           metadata: {
-//                userId: String(userId),
-//                subscriptionId: String(isExistPackage._id),
-//           },
-//           // your backend url for success and cancel
-//           success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-//           cancel_url: `${config.backend_url}/subscription/cancel`,
-//      });
-//      return {
-//           url: session.url,
-//           sessionId: session.id,
-//      };
+
+
+
+
+// export const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
+//     // 1️⃣ Check if the package exists and is active
+//     const isExistPackage = await Package.findOne({
+//         _id: packageId,
+//         status: 'active',
+//     });
+
+//     if (!isExistPackage) {
+//         throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
+//     }
+
+//     // 2️⃣ Find the user
+//     let user = await User.findById(userId).select('+stripeCustomerId');
+//     if (!user) {
+//         throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+//     }
+
+//     // 3️⃣ If stripeCustomerId is missing, create it
+//     if (!user.stripeCustomerId) {
+//         const customer = await stripe.customers.create({
+//             email: user.email,
+//             name: `${user.firstName || ''} ${user.lastName || ''}`,
+//         });
+
+//         user.stripeCustomerId = customer.id;
+//         await user.save();
+//     }
+
+//     // 4️⃣ Create Stripe checkout session
+//     const session = await stripe.checkout.sessions.create({
+//         mode: 'subscription',
+//         customer: String(user.stripeCustomerId),
+//         line_items: [
+//             {
+//                 price: String(isExistPackage.priceId),
+//                 quantity: 1,
+//             },
+//         ],
+//         metadata: {
+//             userId: String(user._id),
+//             subscriptionId: String(isExistPackage._id),
+//         },
+//         success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+//         cancel_url: `${config.backend_url}/api/v1/subscription/cancel`,
+//     });
+
+//     // 5️⃣ Return session info
+//     return {
+//         url: session.url,
+//         sessionId: session.id,
+//     };
 // };
 
 
 
 
 
+export const checkoutSuccessController = async (userId: string, packageId: string) => {
+    // 1️⃣ Check package exists
+    const packageDoc = await Package.findOne({ _id: packageId, status: 'active' });
+    if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
 
-export const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
-    // 1️⃣ Check if the package exists and is active
-    const isExistPackage = await Package.findOne({
-        _id: packageId,
-        status: 'active',
-    });
+    // 2️⃣ Find user
+    const user = await User.findById(userId).select('+stripeCustomerId');
+    if (!user) throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
 
-    if (!isExistPackage) {
-        throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
-    }
-
-    // 2️⃣ Find the user
-    let user = await User.findById(userId).select('+stripeCustomerId');
-    if (!user) {
-        throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-    }
-
-    // 3️⃣ If stripeCustomerId is missing, create it
+    // 3️⃣ Create stripe customer if missing
     if (!user.stripeCustomerId) {
         const customer = await stripe.customers.create({
             email: user.email,
             name: `${user.firstName || ''} ${user.lastName || ''}`,
         });
-
         user.stripeCustomerId = customer.id;
         await user.save();
     }
 
-    // 4️⃣ Create Stripe checkout session
+    // 4️⃣ Create checkout session
     const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
         customer: String(user.stripeCustomerId),
-        line_items: [
-            {
-                price: String(isExistPackage.priceId),
-                quantity: 1,
-            },
-        ],
+        line_items: [{ price: String(packageDoc.priceId), quantity: 1 }],
         metadata: {
-            userId: String(userId),
-            subscriptionId: String(isExistPackage._id),
+            userId: String(user._id), // MongoDB ObjectId string
+            subscriptionId: String(packageDoc._id),
         },
         success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${config.backend_url}/api/v1/subscription/cancel`,
     });
 
-    // 5️⃣ Return session info
-    return {
-        url: session.url,
-        sessionId: session.id,
-    };
+    return { url: session.url, sessionId: session.id };
 };
-
-
-
-
-
 
 
 
@@ -352,9 +349,68 @@ const cancelSubscriptionToDB = async (userId: string) => {
 //      return session;
 // };
 
-export const saveSubscriptionToDB = async (userId: string, sessionId: string) => {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
+
+// export const saveSubscriptionToDB = async (userId: string, sessionId: string) => {
+//     const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+//     if (!session || session.payment_status !== 'paid') {
+//         throw new AppError(StatusCodes.BAD_REQUEST, 'Payment not completed');
+//     }
+
+//     if (!session.subscription) {
+//         throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
+//     }
+
+//     // Retrieve Stripe subscription
+//     const stripeSubscription = typeof session.subscription === 'string'
+//         ? await stripe.subscriptions.retrieve(session.subscription)
+//         : session.subscription;
+
+//     // TypeScript safe cast
+//     const subscriptionTyped: Stripe.Subscription = stripeSubscription as unknown as Stripe.Subscription;
+
+//     // Retrieve package
+//     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
+//     if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
+
+//     // Calculate remaining days
+//     const durationMap: Record<string, number> = {
+//         '1 month': 30,
+//         '3 months': 90,
+//         '6 months': 180,
+//         '1 year': 365,
+//     };
+//     const remainingDays = durationMap[packageDoc.duration] || 30;
+
+//     // Convert Stripe period timestamps
+//     const currentPeriodStart = subscriptionTyped.current_period_start
+//         ? new Date(subscriptionTyped.current_period_start * 1000)
+//         : null;
+
+//     const currentPeriodEnd = subscriptionTyped.current_period_end
+//         ? new Date(subscriptionTyped.current_period_end * 1000)
+//         : null;
+
+//     // Save to MongoDB
+//     return await Subscription.create({
+//         userId,
+//         package: packageDoc._id,
+//         price: packageDoc.price,
+//         subscriptionId: subscriptionTyped.id,
+//         currentPeriodStart,
+//         currentPeriodEnd,
+//         remaining: remainingDays,
+//         status: 'active',
+//         customerId: subscriptionTyped.customer,
+//     });
+// };
+
+
+
+export const saveSubscriptionToDB = async (sessionId: string) => {
+    // 1️⃣ Retrieve checkout session
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (!session || session.payment_status !== 'paid') {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Payment not completed');
     }
@@ -363,19 +419,27 @@ export const saveSubscriptionToDB = async (userId: string, sessionId: string) =>
         throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
     }
 
-    // Retrieve Stripe subscription
-    const stripeSubscription = typeof session.subscription === 'string'
+    // 2️⃣ Retrieve userId from metadata
+    const userId = session.metadata?.userId;
+    if (!userId || !Types.ObjectId.isValid(userId)) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
+
+    // 3️⃣ Retrieve Stripe subscription
+    const stripeSubscriptionRaw = typeof session.subscription === 'string'
         ? await stripe.subscriptions.retrieve(session.subscription)
         : session.subscription;
 
-    // TypeScript safe cast
-    const subscriptionTyped: Stripe.Subscription = stripeSubscription as unknown as Stripe.Subscription;
+    const stripeSubscription = stripeSubscriptionRaw as unknown as Stripe.Subscription;
 
-    // Retrieve package
+    // 4️⃣ Retrieve package
     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
     if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
 
-    // Calculate remaining days
+    // 5️⃣ Calculate remaining days
     const durationMap: Record<string, number> = {
         '1 month': 30,
         '3 months': 90,
@@ -384,36 +448,30 @@ export const saveSubscriptionToDB = async (userId: string, sessionId: string) =>
     };
     const remainingDays = durationMap[packageDoc.duration] || 30;
 
-    // Convert Stripe period timestamps
-    const currentPeriodStart = subscriptionTyped.current_period_start
-        ? new Date(subscriptionTyped.current_period_start * 1000)
+    // 6️⃣ Convert Stripe timestamps to Date
+    const currentPeriodStart = stripeSubscription.current_period_start
+        ? new Date(stripeSubscription.current_period_start * 1000)
         : null;
 
-    const currentPeriodEnd = subscriptionTyped.current_period_end
-        ? new Date(subscriptionTyped.current_period_end * 1000)
+    const currentPeriodEnd = stripeSubscription.current_period_end
+        ? new Date(stripeSubscription.current_period_end * 1000)
         : null;
 
-    // Save to MongoDB
-    return await Subscription.create({
-        userId,
+    // 7️⃣ Save subscription to MongoDB
+    const subscription = await Subscription.create({
+        userId: user._id,
         package: packageDoc._id,
         price: packageDoc.price,
-        subscriptionId: subscriptionTyped.id,
+        subscriptionId: stripeSubscription.id,
         currentPeriodStart,
         currentPeriodEnd,
         remaining: remainingDays,
         status: 'active',
-        customerId: subscriptionTyped.customer,
+        customerId: stripeSubscription.customer,
     });
+
+    return subscription;
 };
-
-
-
-
-
-
-
-
 
 
 
