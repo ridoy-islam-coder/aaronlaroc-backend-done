@@ -11,7 +11,7 @@ import { MedicalModel } from "../medical-Information/medical.model";
 import { HomeAutoModel } from "../homeAuto-Information/homeauto.model";
 
 import { SocialInfoModel } from "../social-Information/social.model";
-import { ProxyUser, ProxyUserResponse } from "./user.interface";
+import { ProxyUser, ProxyUserResponse, Role } from "./user.interface";
 
 
 type PipelineStage = any;
@@ -603,30 +603,6 @@ export const deleteUserService = async (req:Request) => {
 
 
 
-// export const getCountsService = async (req: Request) => {
-//   try {
-//     const days = Number(req.query.days) || 10; // optional ?days=5
-//     const tenDaysAgo = new Date();
-//     tenDaysAgo.setDate(tenDaysAgo.getDate() - days);
-
-//     const [totalUsers, newUsersLastNDays, totalReports] = await Promise.all([
-//       User.countDocuments(),
-//       User.countDocuments({ createdAt: { $gte: tenDaysAgo } }),
-//       ReportModel.countDocuments()
-//     ]);
-
-//     return {
-//       status: true,
-//       data: {
-//         totalUsers,
-//         newUsersLastNDays,
-//         totalReports
-//       }
-//     };
-//   } catch (error) {
-//     return { status: false, data: error };
-//   }
-// };
 
 
 export const getCountsService = async (req: Request) => {
@@ -818,4 +794,45 @@ export const getUsersWhoSetMyProxyService = async (
       data: []
     };
   }
+};
+
+
+
+
+
+
+//end admin login 
+
+
+
+
+export const adminLoginService = async (
+  email: string,
+  password: string
+) => {
+  // user exists check
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // ❌ only admin allowed
+  if (user.role !== Role.ADMIN) {
+    throw new Error("Access denied. Only admin can login.");
+  }
+
+  // password check
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+  if (!isPasswordMatch) {
+    throw new Error("Invalid password");
+  }
+
+  // token generate
+  const token = jwt.sign(
+    { userId: user._id, role: user.role },
+    config.jwt_secret as string,
+    { expiresIn: "30d" }
+  );
+
+  return { user, token };
 };

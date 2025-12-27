@@ -1,10 +1,10 @@
 import { Document, Types } from "mongoose";
 
 export enum Role {
-    USER = "user",
-    ADMIN = "admin",
-    CORPORATE = "corporate",
-  
+    USER = "USER",
+    ADMIN = "ADMIN",
+    CORPORATE = "CORPORATE",
+
 }
 
 export interface IUser extends Document {
