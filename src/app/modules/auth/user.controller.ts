@@ -263,8 +263,6 @@ export const UserList = async (req: Request, res: Response): Promise<void> => {
     const perPage = Number(req.query.perPage) || 10;
     const searchKeyword = (req.query.searchKeyword as string) || "";
 
-    const skipRow = (pageNo - 1) * perPage;
-
     // Build search query
     let searchQuery = {};
     if (searchKeyword && searchKeyword !== "0") {
@@ -280,27 +278,31 @@ export const UserList = async (req: Request, res: Response): Promise<void> => {
       };
     }
 
-    // Fetch data and total count
-    const [rows, total] = await Promise.all([
-      User.find(searchQuery).skip(skipRow).limit(perPage),
-      User.countDocuments(searchQuery),
-    ]);
+    // Get total count first
+    const total = await User.countDocuments(searchQuery);
+    const totalPages = Math.ceil(total / perPage);
+
+    // Ensure current page is within range
+    const currentPage = pageNo > totalPages ? totalPages : pageNo < 1 ? 1 : pageNo;
+    const skipRow = (currentPage - 1) * perPage;
+
+    // Fetch rows
+    const rows = await User.find(searchQuery).skip(skipRow).limit(perPage);
 
     res.status(200).json({
       status: "success",
       data: {
         total,
         rows,
-        currentPage: pageNo,
+        currentPage,
         perPage,
-        totalPages: Math.ceil(total / perPage),
+        totalPages,
       },
     });
   } catch (err: any) {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
-
 
 
 
