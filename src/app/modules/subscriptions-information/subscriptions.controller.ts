@@ -101,15 +101,15 @@ const orderCancel = catchAsync(async (req, res) => {
 // Controller for Stripe checkout success
 export const checkoutSuccessController = catchAsync(async (req, res ) => {
     const sessionId = req.query.session_id as string;
-    const userId = req.user?.id;
+//     const userId = req.user?.id;
 
     if (!sessionId) {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Session ID is required');
     }
 
-    if (!userId) {
-        throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
-    }
+//     if (!userId) {
+//         throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
+//     }
 
     // Save subscription in DB   userId
     const subscription = await saveSubscriptionToDB(sessionId);
