@@ -414,6 +414,7 @@ interface MyStripeSubscription extends Stripe.Subscription {
 export const saveSubscriptionToDB = async (sessionId: string) => {
     // 1️⃣ Retrieve Stripe checkout session
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+
     if (!session || session.payment_status !== 'paid') {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Payment not completed');
     }
@@ -422,33 +423,29 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
     }
 
-    // 2️⃣ Retrieve userId from metadata
+    // 2️⃣ Retrieve userId
     const userId = session.metadata?.userId;
-    if (!userId || !Types.ObjectId.isValid(userId)) {
-        throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
-    }
+    if (!userId) throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
 
     const user = await User.findById(userId);
     if (!user) throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
 
-    // 3️⃣ Retrieve Stripe subscription object
+    // 3️⃣ Retrieve Stripe subscription
     const stripeSubscriptionRaw = typeof session.subscription === 'string'
         ? await stripe.subscriptions.retrieve(session.subscription)
         : session.subscription;
 
-    const stripeSubscription = stripeSubscriptionRaw as unknown as MyStripeSubscription;
+    const stripeSubscription = stripeSubscriptionRaw as MyStripeSubscription;
 
-    // Ensure subscription ID exists (unique key)
-    const stripeSubscriptionId = stripeSubscription.id;
-    if (!stripeSubscriptionId) {
+    if (!stripeSubscription.id) {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Stripe subscription ID is missing');
     }
 
-    // 4️⃣ Retrieve package info
+    // 4️⃣ Retrieve package
     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
     if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
 
-    // 5️⃣ Calculate remaining days based on package duration
+    // 5️⃣ Calculate remaining days
     const durationMap: Record<string, number> = {
         '1 month': 30,
         '3 months': 90,
@@ -457,21 +454,21 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
     };
     const remainingDays = durationMap[packageDoc.duration] || 30;
 
-    // 6️⃣ Convert Stripe timestamps to Date safely
+    // 6️⃣ Convert timestamps safely
     const currentPeriodStart = stripeSubscription.current_period_start
         ? new Date(stripeSubscription.current_period_start * 1000)
-        : new Date(); // fallback: now
+        : new Date(); // fallback now
 
     const currentPeriodEnd = stripeSubscription.current_period_end
         ? new Date(stripeSubscription.current_period_end * 1000)
-        : new Date(currentPeriodStart.getTime() + remainingDays * 24 * 60 * 60 * 1000); // fallback: add remaining days
+        : new Date(currentPeriodStart.getTime() + remainingDays * 24 * 60 * 60 * 1000);
 
-    // 7️⃣ Save subscription to MongoDB
+    // 7️⃣ Save subscription
     const subscription = await Subscription.create({
         userId: user._id,
         package: packageDoc._id,
         price: packageDoc.price,
-        subscriptionId: stripeSubscriptionId,
+        subscriptionId: stripeSubscription.id,
         currentPeriodStart,
         currentPeriodEnd,
         remaining: remainingDays,
@@ -481,7 +478,6 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
 
     return subscription;
 };
-
 
 
 
