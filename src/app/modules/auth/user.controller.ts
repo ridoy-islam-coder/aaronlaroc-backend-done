@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, adminLoginService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService, getUserList,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminEmailService, adminLoginService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 import { ProxyUser } from "./user.interface";
+import { User } from "./user.model";
 
 
 
@@ -254,21 +255,51 @@ export const forgetPassword = async (req: Request, res: Response, next: NextFunc
 
 
 
+
 export const UserList = async (req: Request, res: Response): Promise<void> => {
   try {
-    const pageNo = Number(req.query.pageNo) || 1;       // default 1
-    const perPage = Number(req.query.perPage) || 10;    // default 10
-    const searchKeyword = (req.query.searchKeyword as string) || "0"; // default "0"
+    // Read query parameters
+    const pageNo = Number(req.query.pageNo) || 1;
+    const perPage = Number(req.query.perPage) || 10;
+    const searchKeyword = (req.query.searchKeyword as string) || "";
 
-    const data = await getUserList(pageNo, perPage, searchKeyword);
+    const skipRow = (pageNo - 1) * perPage;
 
-    res.status(200).json({ status: "success", data });
+    // Build search query
+    let searchQuery = {};
+    if (searchKeyword && searchKeyword !== "0") {
+      const searchRegex = { $regex: searchKeyword, $options: "i" };
+      searchQuery = {
+        $or: [
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex },
+          { phoneNumber: searchRegex },
+          { company: searchRegex },
+        ],
+      };
+    }
+
+    // Fetch data and total count
+    const [rows, total] = await Promise.all([
+      User.find(searchQuery).skip(skipRow).limit(perPage),
+      User.countDocuments(searchQuery),
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        total,
+        rows,
+        currentPage: pageNo,
+        perPage,
+        totalPages: Math.ceil(total / perPage),
+      },
+    });
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ status: "error", message: err.message });
   }
 };
-
-
 
 
 

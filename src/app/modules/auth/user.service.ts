@@ -492,52 +492,52 @@ export const updatePassword = async (email: string, password: string) => {
 
 
 
-export const getUserList = async (
-  pageNo: number,
-  perPage: number,
-  searchKeyword: string
-) => {
-  const skipRow = (pageNo - 1) * perPage;
-  let data;
+// export const getUserList = async (
+//   pageNo: number,
+//   perPage: number,
+//   searchKeyword: string
+// ) => {
+//   const skipRow = (pageNo - 1) * perPage;
+//   let data;
 
-  if (searchKeyword !== "0") {
-    const searchRegex = { $regex: searchKeyword, $options: "i" };
-    const searchQuery = {
-      $or: [
-        { firstName: searchRegex },
-        { lastName: searchRegex },
-        { email: searchRegex },
-        { phoneNumber: searchRegex },
-        { company: searchRegex },
+//   if (searchKeyword !== "0") {
+//     const searchRegex = { $regex: searchKeyword, $options: "i" };
+//     const searchQuery = {
+//       $or: [
+//         { firstName: searchRegex },
+//         { lastName: searchRegex },
+//         { email: searchRegex },
+//         { phoneNumber: searchRegex },
+//         { company: searchRegex },
         
-      ],
-    };
+//       ],
+//     };
 
-    const pipeline: PipelineStage[] = [
-      {
-        $facet: {
-          Total: [{ $match: searchQuery }, { $count: "count" }],
-          Rows: [{ $match: searchQuery }, { $skip: skipRow }, { $limit: perPage }],
-        },
-      },
-    ];
+//     const pipeline: PipelineStage[] = [
+//       {
+//         $facet: {
+//           Total: [{ $match: searchQuery }, { $count: "count" }],
+//           Rows: [{ $match: searchQuery }, { $skip: skipRow }, { $limit: perPage }],
+//         },
+//       },
+//     ];
 
-    data = await User.aggregate(pipeline);
-  } else {
-    const pipeline: PipelineStage[] = [
-      {
-        $facet: {
-          Total: [{ $count: "count" }],
-          Rows: [{ $skip: skipRow }, { $limit: perPage }],
-        },
-      },
-    ];
+//     data = await User.aggregate(pipeline);
+//   } else {
+//     const pipeline: PipelineStage[] = [
+//       {
+//         $facet: {
+//           Total: [{ $count: "count" }],
+//           Rows: [{ $skip: skipRow }, { $limit: perPage }],
+//         },
+//       },
+//     ];
 
-    data = await User.aggregate(pipeline);
-  }
+//     data = await User.aggregate(pipeline);
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
 
 
