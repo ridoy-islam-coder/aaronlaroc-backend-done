@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import AppError from '../../../errors/AppError';
 import { config } from '../../config';
 import stripe from '../../config/stripe';
@@ -6,7 +7,7 @@ import { Package } from '../package/package.model';
 import { ISubscription } from './subscriptions.interface';
 import { Subscription } from './subscriptions.model';
 import { StatusCodes } from 'http-status-codes';
-import Stripe from 'stripe';
+
 // import { ISubscription } from './subscription.interface';
 // import { Subscription } from './subscription.model';
 // import stripe from '../../../config/stripe';
@@ -251,7 +252,7 @@ export const createSubscriptionCheckoutSession = async (userId: string, packageI
             subscriptionId: String(isExistPackage._id),
         },
         success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${config.backend_url}/subscription/cancel`,
+        cancel_url: `${config.backend_url}/api/v1/subscription/cancel`,
     });
 
     // 5️⃣ Return session info
@@ -260,6 +261,8 @@ export const createSubscriptionCheckoutSession = async (userId: string, packageI
         sessionId: session.id,
     };
 };
+
+
 
 
 
@@ -349,68 +352,71 @@ const cancelSubscriptionToDB = async (userId: string) => {
 //      return session;
 // };
 
-
-
-// Save subscription to MongoDB after Stripe checkout success
 export const saveSubscriptionToDB = async (userId: string, sessionId: string) => {
-    // 1️⃣ Retrieve session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (!session || session.payment_status !== 'paid') {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Payment not completed');
     }
 
-    // 2️⃣ Check subscription field exists
     if (!session.subscription) {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
     }
 
-    // 3️⃣ Get full Stripe subscription object
-    let stripeSubscription: any;
-    if (typeof session.subscription === 'string') {
-        stripeSubscription = await stripe.subscriptions.retrieve(session.subscription) as any;
-    } else {
-        stripeSubscription = session.subscription as any;
-    }
+    // Retrieve Stripe subscription
+    const stripeSubscription = typeof session.subscription === 'string'
+        ? await stripe.subscriptions.retrieve(session.subscription)
+        : session.subscription;
 
-    // 4️⃣ Retrieve package info from DB
+    // TypeScript safe cast
+    const subscriptionTyped: Stripe.Subscription = stripeSubscription as unknown as Stripe.Subscription;
+
+    // Retrieve package
     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
-    if (!packageDoc) {
-        throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
-    }
+    if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
 
-    // 5️⃣ Calculate remaining days based on package duration
-    let remainingDays = 0;
-    switch (packageDoc.duration) {
-        case '1 month':
-            remainingDays = 30;
-            break;
-        case '3 months':
-            remainingDays = 90;
-            break;
-        case '6 months':
-            remainingDays = 180;
-            break;
-        case '1 year':
-            remainingDays = 365;
-            break;
-    }
+    // Calculate remaining days
+    const durationMap: Record<string, number> = {
+        '1 month': 30,
+        '3 months': 90,
+        '6 months': 180,
+        '1 year': 365,
+    };
+    const remainingDays = durationMap[packageDoc.duration] || 30;
 
-    // 6️⃣ Save subscription to MongoDB
-    const subscription = await Subscription.create({
+    // Convert Stripe period timestamps
+    const currentPeriodStart = subscriptionTyped.current_period_start
+        ? new Date(subscriptionTyped.current_period_start * 1000)
+        : null;
+
+    const currentPeriodEnd = subscriptionTyped.current_period_end
+        ? new Date(subscriptionTyped.current_period_end * 1000)
+        : null;
+
+    // Save to MongoDB
+    return await Subscription.create({
         userId,
         package: packageDoc._id,
         price: packageDoc.price,
-        subscriptionId: stripeSubscription.id,
-        currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+        subscriptionId: subscriptionTyped.id,
+        currentPeriodStart,
+        currentPeriodEnd,
         remaining: remainingDays,
         status: 'active',
-        customerId: stripeSubscription.customer,
+        customerId: subscriptionTyped.customer,
     });
-
-    return subscription;
 };
+
+
+
+
+
+
+
+
+
+
+
 
 
 
