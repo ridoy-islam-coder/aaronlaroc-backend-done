@@ -25,6 +25,7 @@ export type ISubscription = {
      trxId?: string; // optional, যদি সব সময় থাকে না
      remaining: number;
      subscriptionId: string;
+     stripeSubscriptionId: string;
      status: 'expired' | 'active' | 'cancel' | 'deactivated';
      currentPeriodStart: Date;  // <-- Date type
      currentPeriodEnd: Date;    // <-- Date type
