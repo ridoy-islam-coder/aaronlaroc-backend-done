@@ -422,7 +422,7 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
     }
 
-    // 2️⃣ Retrieve userId from session metadata
+    // 2️⃣ Retrieve userId from metadata
     const userId = session.metadata?.userId;
     if (!userId || !Types.ObjectId.isValid(userId)) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
@@ -438,6 +438,12 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
 
     const stripeSubscription = stripeSubscriptionRaw as unknown as MyStripeSubscription;
 
+    // Ensure subscription ID exists (unique key)
+    const stripeSubscriptionId = stripeSubscription.id;
+    if (!stripeSubscriptionId) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Stripe subscription ID is missing');
+    }
+
     // 4️⃣ Retrieve package info
     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
     if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
@@ -451,29 +457,21 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
     };
     const remainingDays = durationMap[packageDoc.duration] || 30;
 
-    // 6️⃣ Convert Stripe timestamps to Date
-    let currentPeriodStart: Date;
-    let currentPeriodEnd: Date;
+    // 6️⃣ Convert Stripe timestamps to Date safely
+    const currentPeriodStart = stripeSubscription.current_period_start
+        ? new Date(stripeSubscription.current_period_start * 1000)
+        : new Date(); // fallback: now
 
-    if (stripeSubscription.current_period_start) {
-        currentPeriodStart = new Date(stripeSubscription.current_period_start * 1000);
-    } else {
-        currentPeriodStart = new Date(); // fallback: now
-    }
-
-    if (stripeSubscription.current_period_end) {
-        currentPeriodEnd = new Date(stripeSubscription.current_period_end * 1000);
-    } else {
-        // fallback: calculate using package duration
-        currentPeriodEnd = new Date(currentPeriodStart.getTime() + remainingDays * 24 * 60 * 60 * 1000);
-    }
+    const currentPeriodEnd = stripeSubscription.current_period_end
+        ? new Date(stripeSubscription.current_period_end * 1000)
+        : new Date(currentPeriodStart.getTime() + remainingDays * 24 * 60 * 60 * 1000); // fallback: add remaining days
 
     // 7️⃣ Save subscription to MongoDB
     const subscription = await Subscription.create({
         userId: user._id,
         package: packageDoc._id,
         price: packageDoc.price,
-        subscriptionId: stripeSubscription.id,
+        subscriptionId: stripeSubscriptionId,
         currentPeriodStart,
         currentPeriodEnd,
         remaining: remainingDays,
