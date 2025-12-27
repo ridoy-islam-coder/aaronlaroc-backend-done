@@ -87,7 +87,10 @@ router.post("/codeverify",codeverify)
 router.post("/forgetPassword",forgetPassword)
 
 // User List with Pagination
-router.get("/pagenationlist/:pageNo/:perPage/:searchKeyword",auth,isAdmin, UserList);
+// router.get("/pagenationlist/:pageNo/:perPage/:searchKeyword",auth,isAdmin, UserList);
+
+router.get("/pagenationlist", auth, isAdmin, UserList);
+
 // New Users in Last 10 Days
 router.get("/new-user-last",auth,isAdmin, getNewUsersLast10Days);
 
