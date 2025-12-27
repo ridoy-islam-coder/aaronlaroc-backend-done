@@ -238,11 +238,27 @@ export const forgetPassword = async (req: Request, res: Response, next: NextFunc
 
 
 
+// export const UserList = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const pageNo = Number(req.params.pageNo);
+//     const perPage = Number(req.params.perPage);
+//     const searchKeyword = req.params.searchKeyword;
+
+//     const data = await getUserList(pageNo, perPage, searchKeyword);
+
+//     res.status(200).json({ status: "success", data });
+//   } catch (err: any) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+
+
 export const UserList = async (req: Request, res: Response): Promise<void> => {
   try {
-    const pageNo = Number(req.params.pageNo);
-    const perPage = Number(req.params.perPage);
-    const searchKeyword = req.params.searchKeyword;
+    const pageNo = Number(req.query.pageNo) || 1;       // default 1
+    const perPage = Number(req.query.perPage) || 10;    // default 10
+    const searchKeyword = (req.query.searchKeyword as string) || "0"; // default "0"
 
     const data = await getUserList(pageNo, perPage, searchKeyword);
 
@@ -251,6 +267,13 @@ export const UserList = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+
+
+
+
 
 
 
