@@ -605,9 +605,57 @@ export const deleteUserService = async (req:Request) => {
 
 
 
+// export const getCountsService = async (req: Request) => {
+//   try {
+//     const days = Number(req.query.days) || 10;
+
+//     // Last N days
+//     const nDaysAgo = new Date();
+//     nDaysAgo.setDate(nDaysAgo.getDate() - days);
+
+//     // Last Month Range
+//     const startOfLastMonth = new Date();
+//     startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1, 1);
+//     startOfLastMonth.setHours(0, 0, 0, 0);
+
+//     const endOfLastMonth = new Date();
+//     endOfLastMonth.setDate(0);
+//     endOfLastMonth.setHours(23, 59, 59, 999);
+
+//     const [
+//       totalUsers,
+//       newUsersLastNDays,
+//       lastMonthUsers,
+//       totalReports
+//     ] = await Promise.all([
+//       User.countDocuments(),
+//       User.countDocuments({ createdAt: { $gte: nDaysAgo } }),
+//       User.countDocuments({
+//         createdAt: {
+//           $gte: startOfLastMonth,
+//           $lte: endOfLastMonth
+//         }
+//       }),
+//       ReportModel.countDocuments()
+//     ]);
+
+//     return {
+//       status: true,
+//       data: {
+//         totalUsers,
+//         newUsersLastNDays,
+//         lastMonthUsers,
+//         totalReports
+//       }
+//     };
+//   } catch (error) {
+//     return { status: false, data: error };
+//   }
+// };
+
 export const getCountsService = async (req: Request) => {
   try {
-    const days = Number(req.query.days) || 10;
+    const days = Number(req.query.days) || 30;
 
     // Last N days
     const nDaysAgo = new Date();
@@ -622,29 +670,53 @@ export const getCountsService = async (req: Request) => {
     endOfLastMonth.setDate(0);
     endOfLastMonth.setHours(23, 59, 59, 999);
 
+    // Current month range
+    const startOfThisMonth = new Date();
+    startOfThisMonth.setDate(1);
+    startOfThisMonth.setHours(0, 0, 0, 0);
+
+    const endOfThisMonth = new Date();
+    endOfThisMonth.setHours(23, 59, 59, 999);
+
     const [
       totalUsers,
       newUsersLastNDays,
       lastMonthUsers,
+      currentMonthUsers,
       totalReports
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ createdAt: { $gte: nDaysAgo } }),
       User.countDocuments({
-        createdAt: {
-          $gte: startOfLastMonth,
-          $lte: endOfLastMonth
-        }
+        createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
+      }),
+      User.countDocuments({
+        createdAt: { $gte: startOfThisMonth, $lte: endOfThisMonth }
       }),
       ReportModel.countDocuments()
     ]);
+
+    const calculatePercentage = (current: number, previous: number) => {
+      if (previous === 0) return 100;
+      return ((current - previous) / previous) * 100;
+    };
+
+    const newUsersPercent = parseFloat(calculatePercentage(newUsersLastNDays, lastMonthUsers).toFixed(2));
+    const activeUsersPercent = parseFloat(calculatePercentage(currentMonthUsers, lastMonthUsers).toFixed(2));
+    // Example: inactive users = total - active
+    const inactiveUsers = totalUsers - currentMonthUsers;
+    const inactiveUsersPercent = parseFloat(calculatePercentage(inactiveUsers, lastMonthUsers - currentMonthUsers).toFixed(2));
 
     return {
       status: true,
       data: {
         totalUsers,
         newUsersLastNDays,
-        lastMonthUsers,
+        newUsersPercent,
+        currentMonthUsers,
+        activeUsersPercent,
+        inactiveUsers,
+        inactiveUsersPercent,
         totalReports
       }
     };
@@ -652,8 +724,6 @@ export const getCountsService = async (req: Request) => {
     return { status: false, data: error };
   }
 };
-
-
 
 
 
