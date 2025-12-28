@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { adminEmailService, adminLoginService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 import { ProxyUser } from "./user.interface";
 import { User } from "./user.model";
+import { logSuccess } from "../../../helpers/successLogger";
 
 
 
@@ -21,8 +22,8 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
      const user = await existingUser(phoneNumber, email, password);
 
    
-
-
+  // 🔹 Success log
+    logSuccess(req, "User registered successfully", { userId: user._id, email: user.email });
 return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data: { _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role,},meta: null});
 
 
@@ -48,10 +49,13 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
 
         const { user,token} = await LoginInUser(email, password);
 
-    
+      
+          // 🔹 Success log
+    logSuccess(req, "User logged in successfully", { userId: user._id, email: user.email });
+
 
       return res.status(200).json({ success: true, message: "User logged in successfully",statusCode: 200, data: {_id: user._id,phoneNumber: user.phoneNumber, email: user.email, role: user.role, token: token },
-     meta: null
+       meta: null
       });
 
 
@@ -63,9 +67,11 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
 
 
 
-export const GetProfileData=async (req:Request,res:Response) => {
+export const GetProfileData=async (req:Request,res:Response,next:NextFunction) => {
   
     let result = await getprofileService(req);
+      // 🔹 Success log
+    logSuccess(req, "Fetched user profile");
     res.json(result);
 
 }
@@ -74,6 +80,10 @@ export const GetProfileData=async (req:Request,res:Response) => {
 export const ProfileUpdate=async (req:Request,res:Response) => {
   
     let result = await profileupdateService(req);
+     // 🔹 Success log
+    logSuccess(req, "User profile updated", { userId: req.user?.id || req.params.id });
+
+
     res.json(result);
 
 }
@@ -89,7 +99,7 @@ export const GetAllProfile=async (req:Request,res:Response) => {
 
 
 
-export const searchUsersController = async (req: Request, res: Response) => {
+export const searchUsersController = async (req: Request, res: Response, next: NextFunction) => {
   const searchTerm = req.query.searchTerm as string;
 
   if (!searchTerm || typeof searchTerm !== "string") {
@@ -102,6 +112,9 @@ export const searchUsersController = async (req: Request, res: Response) => {
     if (!users || users.length === 0) {
       return res.status(404).json({ message: "No users found" });
     }
+// 🔹 Success log
+    logSuccess(req, "Search users successfully", { searchTerm, count: users.length });
+
 
     return res.status(200).json({
       status: "success",
@@ -125,6 +138,7 @@ export const searchUsersController = async (req: Request, res: Response) => {
 
 export const ProxysetController = async (req: Request, res: Response) => {
   const result = await ProxysetService(req);
+  logSuccess(req, "Proxy set fetched successfully");
   return res.json(result);
 };
 
@@ -133,6 +147,7 @@ export const ProxysetController = async (req: Request, res: Response) => {
 export const getAllProxysetController = async (req: Request, res: Response) => {
   const { id } = req.params; 
   const result = await getProxysetData(id);
+  logSuccess(req, "User updated successfully", { userId: req.user?.id || req.params.id });
   return res.json(result);
 };
 
@@ -150,6 +165,9 @@ export const alldatapercentage = async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const userProfile = await getUserFullProfileService(userId);
+    
+    // 🔹 Success log
+    logSuccess(req, "Fetched full user profile", { userId });
 
     if (!userProfile) {
       return res.status(404).json({
@@ -179,9 +197,17 @@ export const alldatapercentage = async (req: Request, res: Response) => {
 
 
 
-export const  AdminEmail = async (req: Request, res: Response) => {
-  const result = await adminEmailService(req);
-  return res.json(result);
+// Example: Admin Email
+export const AdminEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminEmailService(req);
+
+    logSuccess(req, "Admin email fetched");
+
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 };
 
 
@@ -198,7 +224,7 @@ export const codeverify = async (req: Request, res: Response, next: NextFunction
     }
 
     const result = await codeVerification(email, otp);
-    console.log(result);
+    logSuccess(req, "OTP code verified", { email });
 
     return res.json({ status: "success", message: result.message });
   } catch (error) {
@@ -229,6 +255,7 @@ export const forgetPassword = async (req: Request, res: Response, next: NextFunc
     }
 
     await updatePassword(email, password);
+     logSuccess(req, "User password updated", { email })
     return res.json({ status: "success", message: "Password updated successfully" });
   } catch (error) {
     next(error);
@@ -238,20 +265,6 @@ export const forgetPassword = async (req: Request, res: Response, next: NextFunc
 
 
 
-
-// export const UserList = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const pageNo = Number(req.params.pageNo);
-//     const perPage = Number(req.params.perPage);
-//     const searchKeyword = req.params.searchKeyword;
-
-//     const data = await getUserList(pageNo, perPage, searchKeyword);
-
-//     res.status(200).json({ status: "success", data });
-//   } catch (err: any) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 
 
 
@@ -541,7 +554,7 @@ export const adminLoginController = async (
     }
 
     const { user, token } = await adminLoginService(email, password);
-
+    logSuccess(req, "Admin logged in successfully", { userId: user._id, email });
     return res.status(200).json({
       success: true,
       message: "Admin logged in successfully",

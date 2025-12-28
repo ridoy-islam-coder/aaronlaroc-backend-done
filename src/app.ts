@@ -12,6 +12,7 @@ import { ReportRoutes } from './app/modules/report-Information/report.routes';
 import { PackageRoutes } from './app/modules/package/package.routes';
 import { SubscriptionRoutes } from './app/modules/subscriptions-information/subscriptions.routes';
 import { startSubscriptionExpireCron } from './app/modules/subscriptions-information/subscriptionExpire.cron';
+import { requestLogger } from './helpers/requestLogger';
 
 
 
@@ -28,7 +29,7 @@ app.use(express.json({  limit: '50mb'}));
 app.use(helmet());
 const limiter = rateLimit({windowMs: 20 * 60 * 1000, max: 100, });
 app.use(limiter);
-
+app.use(requestLogger); // 🔹 all incoming requests logged
 
 
 
@@ -70,6 +71,10 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello from Vercel!");
 });
 
+
+app.get("/test-error", (req, res) => {
+  throw new Error("This is a test error");
+});
 
 
 export default app;
