@@ -3,6 +3,8 @@ import { adminEmailService, adminLoginService, codeVerification, deleteUserServi
 import { ProxyUser } from "./user.interface";
 import { User } from "./user.model";
 import { logSuccess } from "../../../helpers/successLogger";
+import logger from "../../../helpers/logger";
+import { getErrorCount, incrementErrorCount } from "../../../helpers/errorCounter";
 
 
 
@@ -570,5 +572,66 @@ export const adminLoginController = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+
+
+
+
+
+
+
+
+export const getSystemPerformance = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const memoryUsage = process.memoryUsage(); // memory info
+    const uptime = process.uptime(); // seconds
+    const cpuUsage = process.cpuUsage(); // microseconds
+
+    const performanceData = {
+      memory: {
+        rss: memoryUsage.rss,
+        heapTotal: memoryUsage.heapTotal,
+        heapUsed: memoryUsage.heapUsed,
+        external: memoryUsage.external,
+      },
+      cpu: {
+        user: cpuUsage.user,
+        system: cpuUsage.system,
+      },
+      uptime: `${Math.floor(uptime)}s`,
+      timestamp: new Date(),
+    };
+
+    // 🔹 Success log
+    logSuccess(req, "System performance fetched successfully", performanceData);
+
+    res.status(200).json({
+      status: "success",
+      message: "System performance fetched successfully",
+      data: performanceData,
+      meta: {
+        totalErrors: getErrorCount(), // এখন পর্যন্ত কতবার error হয়েছে
+        timestamp: new Date(),
+      },
+    });
+  } catch (error: any) {
+    incrementErrorCount(); // 🔹 error count বৃদ্ধি
+    logger.error("Error fetching system performance", {
+      error: error.message,
+      stack: error.stack,
+      route: req.originalUrl,
+      method: req.method,
+    });
+
+    res.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+      meta: {
+        timestamp: new Date(),
+        errorStack: process.env.NODE_ENV === "production" ? undefined : error.stack,
+      },
+    });
   }
 };

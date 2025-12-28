@@ -36,6 +36,8 @@
 // export default logger;
 // logger.ts
 
+// helpers/logger.ts
+
 import winston from "winston";
 import path from "path";
 
@@ -43,7 +45,7 @@ const isProd = process.env.NODE_ENV === "production";
 
 // Transports array
 const transports: winston.transport[] = [
-  // Always console log
+  // Always log to console
   new winston.transports.Console({
     format: winston.format.combine(
       winston.format.colorize(),
@@ -58,14 +60,22 @@ if (!isProd) {
 
   transports.push(
     new winston.transports.File({
-      filename: `${logDir}/error.log`,
+      filename: path.join(logDir, "error.log"),
       level: "error",
+      format: winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.json()
+      ),
     })
   );
 
   transports.push(
     new winston.transports.File({
-      filename: `${logDir}/combined.log`,
+      filename: path.join(logDir, "combined.log"),
+      format: winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.json()
+      ),
     })
   );
 }
@@ -82,3 +92,12 @@ const logger = winston.createLogger({
 });
 
 export default logger;
+
+
+
+
+
+
+
+
+

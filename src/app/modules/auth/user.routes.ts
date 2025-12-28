@@ -1,5 +1,5 @@
 import express from "express";
-import { AdminEmail, adminLoginController, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { AdminEmail, adminLoginController, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getSystemPerformance, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -106,6 +106,11 @@ router.get("/users/analysis", auth,isAdmin,UserAnalysisController.getAnalysis);
 //count
 router.get("/counts-user-report", auth,isAdmin, getCounts);
 
+
+
+
+// system performance api 
+router.get("/performance",auth,isAdmin, getSystemPerformance);
 
 
 
