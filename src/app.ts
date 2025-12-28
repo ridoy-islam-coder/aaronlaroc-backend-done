@@ -13,7 +13,8 @@ import { PackageRoutes } from './app/modules/package/package.routes';
 import { SubscriptionRoutes } from './app/modules/subscriptions-information/subscriptions.routes';
 import { startSubscriptionExpireCron } from './app/modules/subscriptions-information/subscriptionExpire.cron';
 import { requestLogger } from './helpers/requestLogger';
-
+import dotenv from "dotenv";
+dotenv.config();
 
 
 
