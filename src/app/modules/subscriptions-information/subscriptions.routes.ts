@@ -1,6 +1,8 @@
 import express from 'express';
 import { auth, isAdmin } from '../../middleware/auth.middleware';
 import { checkoutSuccessController, SubscriptionController } from './subscriptions.controller';
+import { subscriptionGuard } from '../../middleware/subscriptionGuard';
+
 
 const router = express.Router();
 //USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN
@@ -13,7 +15,14 @@ router.get('/cancel', SubscriptionController.orderCancel);
 router.post('/create-checkout-session/:id', auth, SubscriptionController.createCheckoutSession);
 router.post('/update/:id', auth, SubscriptionController.updateSubscription);
 router.delete('/subscription/cancel/:id',  SubscriptionController.cancelSubscription);
-router.get('/earnings/monthly',auth,isAdmin,SubscriptionController.getMonthlyEarnings);
+
+
+
+// Example of protected route using subscriptionGuard
+router.get('/premium-content', auth, subscriptionGuard, (req, res) => {
+    res.send('This is premium content for active subscribers only.');
+});
+
 
 
 

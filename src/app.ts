@@ -11,6 +11,7 @@ import { homeautoRoutes } from './app/modules/homeAuto-Information/homeauto.rout
 import { ReportRoutes } from './app/modules/report-Information/report.routes';
 import { PackageRoutes } from './app/modules/package/package.routes';
 import { SubscriptionRoutes } from './app/modules/subscriptions-information/subscriptions.routes';
+import { startSubscriptionExpireCron } from './app/modules/subscriptions-information/subscriptionExpire.cron';
 
 
 
@@ -61,6 +62,8 @@ app.use("/api/v1",SubscriptionRoutes)
 
 //error handling middleware
  app.use(errorHandler) 
+
+startSubscriptionExpireCron();
 
 
 app.get("/", (req: Request, res: Response) => {

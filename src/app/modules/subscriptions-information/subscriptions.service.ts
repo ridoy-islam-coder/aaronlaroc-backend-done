@@ -8,13 +8,7 @@ import { ISubscription } from './subscriptions.interface';
 import { Subscription } from './subscriptions.model';
 import { StatusCodes } from 'http-status-codes';
 import { Types } from 'mongoose'; 
-// import { ISubscription } from './subscription.interface';
-// import { Subscription } from './subscription.model';
-// import stripe from '../../../config/stripe';
-// import { User } from '../user/user.model';
-// import { StatusCodes } from 'http-status-codes';
-// import AppError from '../../../errors/AppError';
-// import config from '../../../config';
+
 
 const subscriptionDetailsFromDB = async (id: string): Promise<{ subscription: ISubscription | {} }> => {
      const subscription = await Subscription.findOne({ userId: id }).populate('package', 'title credit duration').lean();
@@ -172,61 +166,6 @@ const subscriptionsFromDB = async (query: Record<string, unknown>): Promise<ISub
 
 
 
-// export const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
-//     // 1️⃣ Check if the package exists and is active
-//     const isExistPackage = await Package.findOne({
-//         _id: packageId,
-//         status: 'active',
-//     });
-
-//     if (!isExistPackage) {
-//         throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
-//     }
-
-//     // 2️⃣ Find the user
-//     let user = await User.findById(userId).select('+stripeCustomerId');
-//     if (!user) {
-//         throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-//     }
-
-//     // 3️⃣ If stripeCustomerId is missing, create it
-//     if (!user.stripeCustomerId) {
-//         const customer = await stripe.customers.create({
-//             email: user.email,
-//             name: `${user.firstName || ''} ${user.lastName || ''}`,
-//         });
-
-//         user.stripeCustomerId = customer.id;
-//         await user.save();
-//     }
-
-//     // 4️⃣ Create Stripe checkout session
-//     const session = await stripe.checkout.sessions.create({
-//         mode: 'subscription',
-//         customer: String(user.stripeCustomerId),
-//         line_items: [
-//             {
-//                 price: String(isExistPackage.priceId),
-//                 quantity: 1,
-//             },
-//         ],
-//         metadata: {
-//             userId: String(user._id),
-//             subscriptionId: String(isExistPackage._id),
-//         },
-//         success_url: `${config.backend_url}/api/v1/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-//         cancel_url: `${config.backend_url}/api/v1/subscription/cancel`,
-//     });
-
-//     // 5️⃣ Return session info
-//     return {
-//         url: session.url,
-//         sessionId: session.id,
-//     };
-// };
-
-
-
 
 
 export const createSubscriptionCheckoutSession = async (userId: string, packageId: string) => {
@@ -344,68 +283,6 @@ const cancelSubscriptionToDB = async (userId: string) => {
 
      return { success: true, message: 'Subscription canceled successfully' };
 };
-// const successMessage = async (id: string) => {
-//      const session = await stripe.checkout.sessions.retrieve(id);
-//      return session;
-// };
-
-
-
-// export const saveSubscriptionToDB = async (userId: string, sessionId: string) => {
-//     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-//     if (!session || session.payment_status !== 'paid') {
-//         throw new AppError(StatusCodes.BAD_REQUEST, 'Payment not completed');
-//     }
-
-//     if (!session.subscription) {
-//         throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription not created yet');
-//     }
-
-//     // Retrieve Stripe subscription
-//     const stripeSubscription = typeof session.subscription === 'string'
-//         ? await stripe.subscriptions.retrieve(session.subscription)
-//         : session.subscription;
-
-//     // TypeScript safe cast
-//     const subscriptionTyped: Stripe.Subscription = stripeSubscription as unknown as Stripe.Subscription;
-
-//     // Retrieve package
-//     const packageDoc = await Package.findById(session.metadata?.subscriptionId);
-//     if (!packageDoc) throw new AppError(StatusCodes.NOT_FOUND, 'Package not found');
-
-//     // Calculate remaining days
-//     const durationMap: Record<string, number> = {
-//         '1 month': 30,
-//         '3 months': 90,
-//         '6 months': 180,
-//         '1 year': 365,
-//     };
-//     const remainingDays = durationMap[packageDoc.duration] || 30;
-
-//     // Convert Stripe period timestamps
-//     const currentPeriodStart = subscriptionTyped.current_period_start
-//         ? new Date(subscriptionTyped.current_period_start * 1000)
-//         : null;
-
-//     const currentPeriodEnd = subscriptionTyped.current_period_end
-//         ? new Date(subscriptionTyped.current_period_end * 1000)
-//         : null;
-
-//     // Save to MongoDB
-//     return await Subscription.create({
-//         userId,
-//         package: packageDoc._id,
-//         price: packageDoc.price,
-//         subscriptionId: subscriptionTyped.id,
-//         currentPeriodStart,
-//         currentPeriodEnd,
-//         remaining: remainingDays,
-//         status: 'active',
-//         customerId: subscriptionTyped.customer,
-//     });
-// };
-
 // Extend Stripe Subscription type for timestamps
 interface MyStripeSubscription extends Stripe.Subscription {
     current_period_start?: number;
@@ -480,35 +357,45 @@ export const saveSubscriptionToDB = async (sessionId: string) => {
     });
 };
 
-const getMonthlyEarningsStats = async () => {
-  const stats = await Subscription.aggregate([
-    {
-      $match: {
-        status: 'active' // বা 'paid'
-      }
-    },
-    {
-      $group: {
-        _id: { $month: '$createdAt' },
-        totalEarnings: { $sum: '$amount' }
-      }
-    },
-    {
-      $sort: { '_id': 1 }
-    }
-  ]);
 
-  return stats.map(item => ({
-    month: item._id,
-    total: item.totalEarnings
-  }));
+
+
+export const isSubscriptionActive = (sub: ISubscription) => {
+    return new Date() < new Date(sub.currentPeriodEnd);
 };
 
 
 
+// Cron job for expiring subscriptions
+import * as cron from 'node-cron';
+export const startSubscriptionExpireCron = () => {
+    cron.schedule('0 0 * * *', async () => {
+        console.log('Running subscription expire cron');
+        await Subscription.updateMany(
+            { status: 'active', currentPeriodEnd: { $lt: new Date() } },
+            { $set: { status: 'expired' } }
+        );
+    });
+};
 
 
+export const checkActiveSubscription = async (userId: string) => {
+    const subscription = await Subscription.findOne({
+        userId,
+        status: 'active',
+    }).sort({ currentPeriodEnd: -1 });
 
+    if (!subscription) return false;
+
+    // যদি সময় শেষ হয়ে যায়
+    if (new Date() > subscription.currentPeriodEnd) {
+        subscription.status = 'expired';
+        await subscription.save();
+        return false;
+    }
+
+    return true;
+};
 
 
 
@@ -534,5 +421,5 @@ export const SubscriptionService = {
      cancelSubscriptionToDB,
      // successMessage,
      saveSubscriptionToDB,
-     getMonthlyEarningsStats,
+    
 };

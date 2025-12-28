@@ -605,53 +605,6 @@ export const deleteUserService = async (req:Request) => {
 
 
 
-// export const getCountsService = async (req: Request) => {
-//   try {
-//     const days = Number(req.query.days) || 10;
-
-//     // Last N days
-//     const nDaysAgo = new Date();
-//     nDaysAgo.setDate(nDaysAgo.getDate() - days);
-
-//     // Last Month Range
-//     const startOfLastMonth = new Date();
-//     startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1, 1);
-//     startOfLastMonth.setHours(0, 0, 0, 0);
-
-//     const endOfLastMonth = new Date();
-//     endOfLastMonth.setDate(0);
-//     endOfLastMonth.setHours(23, 59, 59, 999);
-
-//     const [
-//       totalUsers,
-//       newUsersLastNDays,
-//       lastMonthUsers,
-//       totalReports
-//     ] = await Promise.all([
-//       User.countDocuments(),
-//       User.countDocuments({ createdAt: { $gte: nDaysAgo } }),
-//       User.countDocuments({
-//         createdAt: {
-//           $gte: startOfLastMonth,
-//           $lte: endOfLastMonth
-//         }
-//       }),
-//       ReportModel.countDocuments()
-//     ]);
-
-//     return {
-//       status: true,
-//       data: {
-//         totalUsers,
-//         newUsersLastNDays,
-//         lastMonthUsers,
-//         totalReports
-//       }
-//     };
-//   } catch (error) {
-//     return { status: false, data: error };
-//   }
-// };
 
 export const getCountsService = async (req: Request) => {
   try {
