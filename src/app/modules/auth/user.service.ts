@@ -92,6 +92,73 @@ export const getprofileService =async (req:Request) => {
 
 
 
+
+
+export const adminDeleteUserService = async (req: Request) => {
+  try {
+    const adminId = req.user?.id;
+    const adminRole = req.user?.role;
+    const deleteUserId = req.params.id;
+
+    // 🔐 Auth check
+    if (!adminId) {
+      return { status: "failed", message: "Unauthorized" };
+    }
+
+    // 🔐 Role check
+    if (adminRole !== Role.ADMIN) {
+      return {
+        status: "failed",
+        message: "Only admin can delete users",
+      };
+    }
+
+    if (!deleteUserId) {
+      return {
+        status: "failed",
+        message: "User id is required",
+      };
+    }
+
+    // ❌ Admin cannot delete himself
+    if (adminId === deleteUserId) {
+      return {
+        status: "failed",
+        message: "Admin cannot delete himself",
+      };
+    }
+
+    const user = await User.findById(deleteUserId);
+
+    if (!user) {
+      return {
+        status: "failed",
+        message: "User not found",
+      };
+    }
+
+    await User.deleteOne({ _id: deleteUserId });
+
+    return {
+      status: "success",
+      message: "User deleted successfully",
+    };
+  } catch (error: any) {
+    return {
+      status: "failed",
+      message: error.message,
+    };
+  }
+};
+
+
+
+
+
+
+
+
+
 export const profileupdateService =async (req:Request) => {
   try {
 

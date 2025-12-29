@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminEmailService, adminLoginService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminDeleteUserService, adminEmailService, adminLoginService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 import { ProxyUser } from "./user.interface";
 import { User } from "./user.model";
 import { logSuccess } from "../../../helpers/successLogger";
@@ -69,6 +69,12 @@ export const loginUser = async (req:Request, res:Response, next:NextFunction) =>
 
 
 
+
+
+
+
+
+
 export const GetProfileData=async (req:Request,res:Response,next:NextFunction) => {
   
     let result = await getprofileService(req);
@@ -89,6 +95,36 @@ export const ProfileUpdate=async (req:Request,res:Response) => {
     res.json(result);
 
 }
+
+
+
+
+
+export const adminDeleteUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const result = await adminDeleteUserService(req);
+
+  if (result.status === "success") {
+    logSuccess(req, "Admin deleted a user", {
+      adminId: req.user?.id,
+      deletedUserId: req.params.id,
+    });
+  }
+
+  res.json(result);
+};
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -271,53 +307,7 @@ export const forgetPassword = async (req: Request, res: Response, next: NextFunc
 
 
 
-// export const UserList = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     // Read query parameters
-//     const pageNo = Number(req.query.pageNo) || 1;
-//     const perPage = Number(req.query.perPage) || 10;
-//     const searchKeyword = (req.query.searchKeyword as string) || "";
 
-//     // Build search query
-//     let searchQuery = {};
-//     if (searchKeyword && searchKeyword !== "0") {
-//       const searchRegex = { $regex: searchKeyword, $options: "i" };
-//       searchQuery = {
-//         $or: [
-//           { firstName: searchRegex },
-//           { lastName: searchRegex },
-//           { email: searchRegex },
-//           { phoneNumber: searchRegex },
-//           { company: searchRegex },
-//         ],
-//       };
-//     }
-
-//     // Get total count first
-//     const total = await User.countDocuments(searchQuery);
-//     const totalPages = Math.ceil(total / perPage);
-
-//     // Ensure current page is within range
-//     const currentPage = pageNo > totalPages ? totalPages : pageNo < 1 ? 1 : pageNo;
-//     const skipRow = (currentPage - 1) * perPage;
-
-//     // Fetch rows
-//     const rows = await User.find(searchQuery).skip(skipRow).limit(perPage);
-
-//     res.status(200).json({
-//       status: "success",
-//       data: {
-//         total,
-//         rows,
-//         currentPage,
-//         perPage,
-//         totalPages,
-//       },
-//     });
-//   } catch (err: any) {
-//     res.status(500).json({ status: "error", message: err.message });
-//   }
-// };
 export const UserList = async (req: Request, res: Response): Promise<void> => {
   try {
     const pageNo = Number(req.query.pageNo) || 1;
