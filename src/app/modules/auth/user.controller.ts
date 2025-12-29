@@ -318,58 +318,65 @@ export const forgetPassword = async (req: Request, res: Response, next: NextFunc
 //     res.status(500).json({ status: "error", message: err.message });
 //   }
 // };
-
 export const UserList = async (req: Request, res: Response): Promise<void> => {
   try {
     const pageNo = Number(req.query.pageNo) || 1;
     const perPage = Number(req.query.perPage) || 10;
     const searchKeyword = (req.query.searchKeyword as string) || "";
 
-    let searchQuery = {};
-    let sortQuery = {};
+    let matchStage: any = {};
+    let addFieldsStage: any = {};
 
     if (searchKeyword && searchKeyword !== "0") {
-      const searchRegex = { $regex: searchKeyword, $options: "i" };
-      searchQuery = {
-        $or: [
-          { firstName: searchRegex },
-          { lastName: searchRegex },
-          { email: searchRegex },
-          { phoneNumber: searchRegex },
-          { company: searchRegex },
-        ],
-      };
+      const regex = new RegExp(searchKeyword, "i");
 
-      // Sort search results: matched users on top
-      // You can also sort by createdAt or updatedAt if needed
-      sortQuery = { firstName: 1 }; // simple alphabetical example
+      addFieldsStage = {
+        isMatched: {
+          $cond: [
+            {
+              $or: [
+                { $regexMatch: { input: "$firstName", regex } },
+                { $regexMatch: { input: "$lastName", regex } },
+                { $regexMatch: { input: "$email", regex } },
+                { $regexMatch: { input: "$phoneNumber", regex } },
+                { $regexMatch: { input: "$company", regex } },
+              ],
+            },
+            1,
+            0,
+          ],
+        },
+      };
+    } else {
+      addFieldsStage = { isMatched: 0 };
     }
 
-    const total = await User.countDocuments(searchQuery);
-    const totalPages = Math.ceil(total / perPage);
-    const currentPage = pageNo > totalPages ? totalPages : pageNo < 1 ? 1 : pageNo;
-    const skipRow = (currentPage - 1) * perPage;
+    const total = await User.countDocuments();
 
-    const rows = await User.find(searchQuery)
-      .sort(sortQuery)
-      .skip(skipRow)
-      .limit(perPage);
+    const users = await User.aggregate([
+      { $addFields: addFieldsStage },
+      { $sort: { isMatched: -1, createdAt: -1 } },
+      { $skip: (pageNo - 1) * perPage },
+      { $limit: perPage },
+    ]);
 
     res.status(200).json({
       status: "success",
       data: {
         total,
-        rows,
-        currentPage,
+        rows: users,
+        currentPage: pageNo,
         perPage,
-        totalPages,
+        totalPages: Math.ceil(total / perPage),
       },
     });
   } catch (err: any) {
-    res.status(500).json({ status: "error", message: err.message });
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
   }
 };
-
 
 
 
