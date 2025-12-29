@@ -387,7 +387,6 @@ export const checkActiveSubscription = async (userId: string) => {
 
     if (!subscription) return false;
 
-    // যদি সময় শেষ হয়ে যায়
     if (new Date() > subscription.currentPeriodEnd) {
         subscription.status = 'expired';
         await subscription.save();
