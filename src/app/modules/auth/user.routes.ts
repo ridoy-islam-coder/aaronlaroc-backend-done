@@ -1,5 +1,5 @@
 import express from "express";
-import { adminDeleteUser, AdminEmail, adminLoginController, adminUpdateUser, alldatapercentage, codeverify,      forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getSystemPerformance, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { adminDeleteUser, AdminEmail, adminLoginController, adminUpdateUser, alldatapercentage, codeverify,      forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getSystemPerformance, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser,  ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList, userSelfUpdate,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -18,7 +18,7 @@ router.post("/login",loginUser)
 router.get("/ProfileDetails",auth,GetProfileData)
 
 // User Profile Update
-router.put("/ProfileUpdate",auth,ProfileUpdate)
+router.put("/ProfileUpdate",auth,userSelfUpdate)
 
 // Get All User Profile
 router.get("/GetAllProfile",auth,GetAllProfile)

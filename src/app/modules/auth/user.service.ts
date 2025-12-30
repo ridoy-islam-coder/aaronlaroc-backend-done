@@ -159,19 +159,50 @@ export const adminDeleteUserService = async (req: Request) => {
 
 
 
-export const profileupdateService =async (req:Request) => {
+export const userSelfUpdateService = async (req: Request) => {
   try {
+    const userId = req.user?.id;
 
-        let reqBody=req.body;
-        let user_id=req.user?.id;
-       let data= await User.updateOne({"_id":user_id},reqBody)
-        return ({status:"success",Message:"User Update successfully",data:data})
-  } catch (error) {
-    return {status:'failed', data: error};
+    if (!userId) {
+      return {
+        status: "failed",
+        message: "Unauthorized",
+      };
+    }
+
+    const reqBody = { ...req.body };
+
+    // 🔒 STRICT: User cannot update role
+    if ("role" in reqBody) {
+      delete reqBody.role;
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return {
+        status: "failed",
+        message: "User not found",
+      };
+    }
+
+    const data = await User.updateOne(
+      { _id: userId },
+      { $set: reqBody }
+    );
+
+    return {
+      status: "success",
+      message: "Profile updated successfully",
+      data,
+    };
+  } catch (error: any) {
+    return {
+      status: "failed",
+      message: error.message,
+    };
   }
-}
-
-
+};
 
 
 

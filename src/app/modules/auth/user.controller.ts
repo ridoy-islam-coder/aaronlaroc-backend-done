@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminDeleteUserService, adminEmailService, adminLoginService, adminUpdateUserService, codeVerification,  existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminDeleteUserService, adminEmailService, adminLoginService, adminUpdateUserService, codeVerification,  existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser,  ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService, userSelfUpdateService } from "./user.service";
 import { ProxyUser } from "./user.interface";
 import { User } from "./user.model";
 import { logSuccess } from "../../../helpers/successLogger";
@@ -85,17 +85,21 @@ export const GetProfileData=async (req:Request,res:Response,next:NextFunction) =
 }
 
 
-export const ProfileUpdate=async (req:Request,res:Response) => {
-  
-    let result = await profileupdateService(req);
-     // 🔹 Success log
-    logSuccess(req, "User profile updated", { userId: req.user?.id || req.params.id });
 
+export const userSelfUpdate = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const result = await userSelfUpdateService(req);
 
-    res.json(result);
+  if (result.status === "success") {
+    logSuccess(req, "User updated own profile", {
+      userId: req.user?.id,
+    });
+  }
 
-}
-
+  res.json(result);
+};
 
 
 
