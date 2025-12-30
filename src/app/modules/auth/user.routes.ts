@@ -111,7 +111,7 @@ router.delete("/deleteUser/:id", auth,isAdmin, adminDeleteUser);
 
 
 // User Profile Update
-router.put("/adminUpdateUser",auth,isAdmin,adminUpdateUser)
+router.put("/adminUpdateUser/:id",auth,isAdmin,adminUpdateUser)
 
 
 
