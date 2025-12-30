@@ -1,5 +1,5 @@
 import express from "express";
-import { adminDeleteUser, AdminEmail, adminLoginController, alldatapercentage, codeverify,   deleteUserController,   forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getSystemPerformance, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
+import { adminDeleteUser, AdminEmail, adminLoginController, adminUpdateUser, alldatapercentage, codeverify,      forgetPassword,  getAllOwnUserDataController,  GetAllProfile, getAllProxysetController, getAllUserDataController, getCounts, getNewUsersLast10Days, GetProfileData, getSystemPerformance, getUsersWhoAddedMeAsProxyController, getUsersWhoSetMyProxy, loginUser, ProfileUpdate, ProxysetController, registerUser, searchUsersController, updateUserController, UserAnalysisController, UserList,  } from "./user.controller";
 import { auth, isAdmin } from './../../middleware/auth.middleware';
 
 
@@ -98,8 +98,7 @@ router.get("/new-user-last",auth,isAdmin, getNewUsersLast10Days);
 // Update User by Admin
 router.put("/updateUser/:id",auth,isAdmin,updateUserController)
 
-// Delete User by Admin
-router.delete("/deleteUser/:id",auth,isAdmin,deleteUserController)
+
 // User Analysis
 router.get("/users/analysis", auth,isAdmin,UserAnalysisController.getAnalysis);
 
@@ -111,6 +110,8 @@ router.get("/counts-user-report", auth,isAdmin, getCounts);
 router.delete("/deleteUser/:id", auth,isAdmin, adminDeleteUser);
 
 
+// User Profile Update
+router.put("/adminUpdateUser",auth,isAdmin,adminUpdateUser)
 
 
 

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { adminDeleteUserService, adminEmailService, adminLoginService, codeVerification, deleteUserService, existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
+import { adminDeleteUserService, adminEmailService, adminLoginService, adminUpdateUserService, codeVerification,  existingUser,   getAllOwnUserDataService,   getAllUserDataService,  getallUsers, getCountsService, getNewUsersLast10DaysService, getprofileService, getProxysetData, getUserFullProfileService,getUsersWhoAddedMeAsProxyService,getUsersWhoSetMyProxyService,LoginInUser, profileupdateService, ProxysetService, searchUsersService,  updatePassword, updateUserService, UserAnalysisService } from "./user.service";
 import { ProxyUser } from "./user.interface";
 import { User } from "./user.model";
 import { logSuccess } from "../../../helpers/successLogger";
@@ -407,11 +407,7 @@ export const getNewUsersLast10Days = async (req: Request, res: Response) => {
 
 
     
-    export const deleteUserController = async (req:Request,res:Response) => {
-    let result = await deleteUserService(req);
-    res.json(result);
-
-    }
+   
 
 
 
@@ -681,4 +677,24 @@ export const getSystemPerformance = async (req: Request, res: Response, next: Ne
       },
     });
   }
+};
+
+
+
+
+
+export const adminUpdateUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const result = await adminUpdateUserService(req);
+
+  if (result.status === "success") {
+    logSuccess(req, "Admin updated user data", {
+      adminId: req.user?.id,
+      updatedUserId: req.params.id,
+    });
+  }
+
+  res.json(result);
 };

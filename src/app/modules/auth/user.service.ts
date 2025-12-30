@@ -648,20 +648,61 @@ export const updateUserService = async (req:Request) => {
 
 
 
-export const deleteUserService = async (req:Request) => {
+
+export const adminUpdateUserService = async (req: Request) => {
   try {
-       let user_id=req.params.id;
+    const adminId = req.user?.id;
+    const adminRole = req.user?.role;
+    const userId = req.params.id;
 
+    // 🔐 Auth check
+    if (!adminId) {
+      return { status: "failed", message: "Unauthorized" };
+    }
 
-        await User.deleteOne({_id: user_id})
-        return ({status: true ,message:"User deleted successfully"})
+    // 🔐 Admin check
+    if (adminRole !== Role.ADMIN) {
+      return {
+        status: "failed",
+        message: "Only admin can update user",
+      };
+    }
 
-  } catch (error) {
-    return {status: false, data: error};
+    if (!userId) {
+      return {
+        status: "failed",
+        message: "User id is required",
+      };
+    }
+
+    const reqBody = { ...req.body }; // ✅ ALL fields allowed
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return {
+        status: "failed",
+        message: "User not found",
+      };
+    }
+
+    const data = await User.updateOne(
+      { _id: userId },
+      { $set: reqBody }
+    );
+
+    return {
+      status: "success",
+      message: "User updated successfully",
+      data,
+    };
+  } catch (error: any) {
+    return {
+      status: "failed",
+      message: error.message,
+    };
   }
-}
-
-
+};
 
 
 
