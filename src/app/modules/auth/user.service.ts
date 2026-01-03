@@ -482,18 +482,34 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
-      // 💡 Suggestion logic
-  let suggestion = "";
+ // 💡 Suggestion logic (3 suggestions for every case)
+let suggestions: string[] = [];
 
-  if (totalPercentage === 100) {
-    suggestion = "Profile is fully completed";
-  } else if (totalPercentage >= 71) {
-    suggestion = "Almost completed, just a few more steps";
-  } else if (totalPercentage >= 41) {
-    suggestion = "Profile is partially completed";
-  } else {
-    suggestion = "Profile is very incomplete, please add more information";
-  }
+if (totalPercentage === 100) {
+  suggestions = [
+    "Profile is fully completed",
+    "You can now access all features without any limitation",
+    "Keep your profile updated for better experience"
+  ];
+} else if (totalPercentage >= 71) {
+  suggestions = [
+    "Your profile is almost completed",
+    "Complete remaining sections to reach 100%",
+    "Review and submit missing information"
+  ];
+} else if (totalPercentage >= 41) {
+  suggestions = [
+    "Your profile is partially completed",
+    "Add more information to improve profile strength",
+    "Completing all sections helps better service"
+  ];
+} else {
+  suggestions = [
+    "Your profile is very incomplete",
+    "Please start adding your personal information",
+    "Completing your profile unlocks more features"
+  ];
+}
 
 
 
@@ -503,7 +519,7 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
       financialPercentage,
       socialInfoPercentage,
       totalPercentage
-    }, suggestion };
+    }, suggestions };
     
 };
 
