@@ -472,23 +472,80 @@ export class UserAnalysisController {
 //proxysetId  data 
 
 
+// export const getAllOwnUserDataController = async (req: Request, res: Response) => {
+//   try {
+//     const loggedInUserId = req.user?.id;
+
+//     const data = await getAllOwnUserDataService(loggedInUserId);
+
+//     res.status(200).json({
+//       success: true,
+//       data
+//     });
+//   } catch (error: any) {
+//     if (error.message === "USER_NOT_FOUND") {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
 export const getAllOwnUserDataController = async (req: Request, res: Response) => {
   try {
+    const requestedUserId = req.params.userId;
     const loggedInUserId = req.user?.id;
 
-    const data = await getAllOwnUserDataService(loggedInUserId);
+    const data = await getAllUserDataService(
+      requestedUserId,
+      loggedInUserId
+    );
 
     res.status(200).json({
       success: true,
       data
     });
   } catch (error: any) {
-    if (error.message === "USER_NOT_FOUND") {
-      return res.status(404).json({ success: false, message: "User not found" });
+    if (error.message === "ACCESS_DENIED") {
+      return res
+        .status(403)
+        .json({ success: false, message: "Access denied" });
     }
-    res.status(500).json({ success: false, message: "Server error" });
+
+    if (error.message === "USER_NOT_FOUND") {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res
+      .status(500)
+      .json({ success: false, message: "Server error" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

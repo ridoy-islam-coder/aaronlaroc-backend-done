@@ -455,12 +455,48 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
+// export const getAllUserDataService = async (
+//   requestedUserId: string,
+//   loggedInUserId: string
+// ) => {
+
+  
+//   const user = await User.findById(requestedUserId);
+//   if (!user) throw new Error("USER_NOT_FOUND");
+
+//   const isOwnData =
+//     requestedUserId.toString() === loggedInUserId.toString();
+
+//   const isProxyUser = user.proxysetId.some(
+//     (id: any) => id.toString() === loggedInUserId.toString()
+//   );
+
+//   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
+
+//   const [homeauto, medical, financial, socialInfo] = await Promise.all([
+//     HomeAutoModel.find({ userID: user._id }),
+//     MedicalModel.find({ userID: user._id }),
+//     FinancialModel.find({ userID: user._id }),
+//     SocialInfoModel.find({ userID: user._id }),
+//   ]);
+
+//   return {
+//     user,       
+//     homeauto,
+//     medical,
+//     financial,
+//     socialInfo
+//   };
+// };
+
+
+
+
+
 export const getAllUserDataService = async (
   requestedUserId: string,
   loggedInUserId: string
 ) => {
-
-  
   const user = await User.findById(requestedUserId);
   if (!user) throw new Error("USER_NOT_FOUND");
 
@@ -480,14 +516,61 @@ export const getAllUserDataService = async (
     SocialInfoModel.find({ userID: user._id }),
   ]);
 
+  // 🔢 Calculate percentages
+  const homeautoPercentage = homeauto.reduce(
+    (sum, item) => sum + (item.homeautoPercentage || 0),
+    0
+  );
+
+  const medicalPercentage = medical.reduce(
+    (sum, item) => sum + (item.medicalsPercentage || 0),
+    0
+  );
+
+  const financialPercentage = financial.reduce(
+    (sum, item) => sum + (item.financialPercentage || 0),
+    0
+  );
+
+  const socialInfoPercentage = socialInfo.reduce(
+    (sum, item) => sum + (item.socialInfoPercentage || 0),
+    0
+  );
+
+  const totalPercentage =
+    homeautoPercentage +
+    medicalPercentage +
+    financialPercentage +
+    socialInfoPercentage;
+
   return {
-    user,       
+    user,
     homeauto,
     medical,
     financial,
-    socialInfo
+    socialInfo,
+    percentages: {
+      homeautoPercentage,
+      medicalPercentage,
+      financialPercentage,
+      socialInfoPercentage,
+      totalPercentage
+    }
   };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
