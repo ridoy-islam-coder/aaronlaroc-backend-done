@@ -575,11 +575,12 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
   if (!user) throw new Error("USER_NOT_FOUND");
 
 
-  const [homeauto, medical, financial,socialInfo] = await Promise.all([
+  const [homeauto, medical, financial,socialInfo,] = await Promise.all([
     HomeAutoModel.find({ userID: loggedInUserId }),
     MedicalModel.find({ userID: loggedInUserId }),
     FinancialModel.find({ userID: loggedInUserId }),
     SocialInfoModel.find({ userID: loggedInUserId }),
+    // User.find({ userID: loggedInUserId }),
   
   ]);
 
@@ -587,7 +588,7 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
-    const homeautoPercentage = homeauto.reduce(
+  const homeautoPercentage = homeauto.reduce(
     (sum, item) => sum + (item.homeautoPercentage || 0),
     0
   );
@@ -609,18 +610,18 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
+  // userPercentage runtime only
+  const userPercentage = user.userPercentage || 0;
 
 
 
-
-  const totalPercentage =user.userPercentage +
+  const totalPercentage =
     homeautoPercentage +
     medicalPercentage +
     financialPercentage +
-    socialInfoPercentage;
+    socialInfoPercentage + userPercentage;
 
-
-
+ 
 
  // 💡 Suggestion logic (3 suggestions for every case)
 let suggestions: string[] = [];
@@ -658,6 +659,7 @@ if (totalPercentage === 100) {
       medicalPercentage,
       financialPercentage,
       socialInfoPercentage,
+      userPercentage,
       totalPercentage
     }, suggestions };
     
