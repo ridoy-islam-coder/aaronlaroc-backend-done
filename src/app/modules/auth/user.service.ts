@@ -70,8 +70,6 @@ export const existingUser = async (body: any) => {
     "state",
     "company",
     "yearStarted",
-    "email",
-    "password",
     "phoneNumber",
     "imgUrl"
   ];
