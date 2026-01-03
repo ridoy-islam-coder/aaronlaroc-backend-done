@@ -467,11 +467,34 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
     0
   );
 
+
+
+
+
+
+
   const totalPercentage =
     homeautoPercentage +
     medicalPercentage +
     financialPercentage +
     socialInfoPercentage;
+
+
+
+
+      // 💡 Suggestion logic
+  let suggestion = "";
+
+  if (totalPercentage === 100) {
+    suggestion = "Profile is fully completed";
+  } else if (totalPercentage >= 71) {
+    suggestion = "Almost completed, just a few more steps";
+  } else if (totalPercentage >= 41) {
+    suggestion = "Profile is partially completed";
+  } else {
+    suggestion = "Profile is very incomplete, please add more information";
+  }
+
 
 
   return { user,homeauto, medical, financial,socialInfo , percentages: {
@@ -480,7 +503,8 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
       financialPercentage,
       socialInfoPercentage,
       totalPercentage
-    }};
+    }, suggestion };
+    
 };
 
 
