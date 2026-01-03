@@ -21,6 +21,7 @@ export interface IUser extends Document {
     password: string;
     imgUrl: string;
     stripeCustomerId:string;
+    userPercentage: number;
     role: Role;
     proxysetId: Types.ObjectId[];
     createdAt: Date;

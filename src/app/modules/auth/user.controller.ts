@@ -12,30 +12,59 @@ import { getErrorCount, incrementErrorCount } from "../../../helpers/errorCounte
 
 
 
-export const registerUser = async (req:Request, res:Response, next:NextFunction) => {
+// export const registerUser = async (req:Request, res:Response, next:NextFunction) => {
 
-    try{
-      const { phoneNumber, email, password } = req.body;
+//     try{
+//       const { phoneNumber, email, password } = req.body;
 
-      if (!phoneNumber || !email || !password) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
+//       if (!phoneNumber || !email || !password) {
+//         return res.status(400).json({ message: "All fields are required" });
+//       }
 
-     const user = await existingUser(phoneNumber, email, password);
+//      const user = await existingUser(phoneNumber, email, password);
 
    
-  // 🔹 Success log
-    logSuccess(req, "User registered successfully", { userId: user._id, email: user.email });
-return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data: { _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role,},meta: null});
+//   // 🔹 Success log
+//     logSuccess(req, "User registered successfully", { userId: user._id, email: user.email });
+// return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data: { _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role,},meta: null});
 
 
-    }catch(error){
-        next(error);
-    }
+//     }catch(error){
+//         next(error);
+//     }
 
 
 
-}
+// }
+
+
+
+
+
+
+export const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await existingUser(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      data: {
+        _id: user._id,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        userPercentage: user.userPercentage
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 
 

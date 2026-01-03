@@ -28,22 +28,73 @@ declare global {
 }
 
 
- export const existingUser=async (phoneNumber: string, email: string, password: string) => {
-    // Check if user already exists
-    const user = await User.findOne({ $or: [{ phoneNumber }, { email }] });
-    if (user) {
-        throw new Error("User already exists");
-    }
+//  export const existingUser=async (phoneNumber: string, email: string, password: string) => {
+//     // Check if user already exists
+//     const user = await User.findOne({ $or: [{ phoneNumber }, { email }] });
+//     if (user) {
+//         throw new Error("User already exists");
+//     }
 
-    const hsedpassword = await bcrypt.hash(password, 10);
+//     const hsedpassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const newUser = new User({ phoneNumber, email, password:hsedpassword });
-    await newUser.save();
+//     // Create new user
+//     const newUser = new User({ phoneNumber, email, password:hsedpassword });
+//     await newUser.save();
 
-    return newUser;
+//     return newUser;
 
-}
+// }
+
+
+
+
+
+
+export const existingUser = async (body: any) => {
+  const { phoneNumber, email, password } = body;
+
+  // Check if user already exists
+  const user = await User.findOne({ $or: [{ phoneNumber }, { email }] });
+  if (user) {
+    throw new Error("User already exists");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // 🔹 Inline percentage calculation
+  const FIELDS = [
+    "firstName",
+    "lastName",
+    "dateOfBirth",
+    "city",
+    "state",
+    "company",
+    "yearStarted",
+    "email",
+    "password",
+    "phoneNumber"
+  ];
+
+  const filledFields = FIELDS.filter(field => {
+    const value = body[field];
+    if (!value) return false;
+    if (typeof value === "string" && value.trim() === "") return false;
+    return true;
+  }).length;
+
+  const userPercentage = Math.round((filledFields / FIELDS.length) * 100);
+
+  // Create new user with calculated percentage
+  const newUser = new User({
+    ...body,
+    password: hashedPassword,
+    userPercentage
+  });
+
+  await newUser.save();
+  return newUser;
+};
+
 
 
 

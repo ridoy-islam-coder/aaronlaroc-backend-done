@@ -58,6 +58,7 @@ const userSchema =  new Schema<IUser>({
                type: String,
                default: '',
           },
+    userPercentage: { type: Number },
     role: {
         type: String,
         enum: Object.values(Role),
