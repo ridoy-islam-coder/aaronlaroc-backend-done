@@ -48,7 +48,7 @@ const userSchema =  new Schema<IUser>({
     // match: /^\+[1-9]\d{1,14}$/,
   },
    otp:{type:String},
-   
+
       imgUrl: {
         type: String,
          default: 'https://i.ibb.co/z5YHLV9/profile.png',

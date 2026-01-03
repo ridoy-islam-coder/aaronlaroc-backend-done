@@ -584,7 +584,10 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
   ]);
 
     // 🔢 Calculate percentages
-  const homeautoPercentage = homeauto.reduce(
+
+
+
+    const homeautoPercentage = homeauto.reduce(
     (sum, item) => sum + (item.homeautoPercentage || 0),
     0
   );
@@ -610,7 +613,7 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
 
 
 
-  const totalPercentage =
+  const totalPercentage =user.userPercentage +
     homeautoPercentage +
     medicalPercentage +
     financialPercentage +
