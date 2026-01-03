@@ -50,16 +50,17 @@ export const registerUser = async (
   try {
     const user = await existingUser(req.body);
 
-    return res.status(201).json({
-      success: true,
-      message: "User registered successfully",
-      data: {
-        _id: user._id,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        userPercentage: user.userPercentage
-      }
-    });
+    // return res.status(201).json({
+    //   success: true,
+    //   message: "User registered successfully",
+    //   data: {
+    //     _id: user._id,
+    //     email: user.email,
+    //     phoneNumber: user.phoneNumber,
+    //     userPercentage: user.userPercentage
+    //   }
+    // });
+    return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data:{ _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role, userPercentage: user.userPercentage},meta: null});
   } catch (error) {
     next(error);
   }
