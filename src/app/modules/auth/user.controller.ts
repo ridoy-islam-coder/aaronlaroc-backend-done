@@ -115,6 +115,21 @@ export const GetProfileData=async (req:Request,res:Response,next:NextFunction) =
 
 
 
+// export const userSelfUpdate = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   const result = await userSelfUpdateService(req);
+
+//   if (result.status === "success") {
+//     logSuccess(req, "User updated own profile", {
+//       userId: req.user?.id,
+//     });
+//   }
+
+//   res.json(result);
+// };
+
 export const userSelfUpdate = async (
   req: Request,
   res: Response
@@ -126,11 +141,9 @@ export const userSelfUpdate = async (
       userId: req.user?.id,
     });
   }
-
+  
   res.json(result);
 };
-
-
 
 
 export const adminDeleteUser = async (

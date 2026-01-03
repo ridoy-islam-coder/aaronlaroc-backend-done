@@ -72,7 +72,8 @@ export const existingUser = async (body: any) => {
     "yearStarted",
     "email",
     "password",
-    "phoneNumber"
+    "phoneNumber",
+    "imgUrl"
   ];
 
   const filledFields = FIELDS.filter(field => {
@@ -88,7 +89,7 @@ export const existingUser = async (body: any) => {
   const newUser = new User({
     ...body,
     password: hashedPassword,
-    userPercentage
+    userPercentage: userPercentage
   });
 
   await newUser.save();
@@ -210,6 +211,64 @@ export const adminDeleteUserService = async (req: Request) => {
 
 
 
+// export const userSelfUpdateService = async (req: Request) => {
+//   try {
+//     const userId = req.user?.id;
+
+//     if (!userId) {
+//       return {
+//         status: "failed",
+//         message: "Unauthorized",
+//       };
+//     }
+
+//     const reqBody = { ...req.body };
+
+//     // 🔒 STRICT: User cannot update role
+//     if ("role" in reqBody) {
+//       delete reqBody.role;
+//     }
+
+//     const user = await User.findById(userId);
+
+//     if (!user) {
+//       return {
+//         status: "failed",
+//         message: "User not found",
+//       };
+//     }
+
+//     const data = await User.updateOne(
+//       { _id: userId },
+//       { $set: reqBody }
+//     );
+
+//     return {
+//       status: "success",
+//       message: "Profile updated successfully",
+//       data,
+//     };
+//   } catch (error: any) {
+//     return {
+//       status: "failed",
+//       message: error.message,
+//     };
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const userSelfUpdateService = async (req: Request) => {
   try {
     const userId = req.user?.id;
@@ -237,15 +296,44 @@ export const userSelfUpdateService = async (req: Request) => {
       };
     }
 
-    const data = await User.updateOne(
-      { _id: userId },
-      { $set: reqBody }
-    );
+    // 🔹 Inline percentage calculation for profile fields
+    const FIELDS = [
+      "firstName",
+      "lastName",
+      "dateOfBirth",
+      "city",
+      "state",
+      "company",
+      "yearStarted",
+      "email",
+      "password",
+      "phoneNumber",
+      "imgUrl" // ✅ included
+    ];
+
+    // Merge current user data with new updates
+    const mergedData = { ...user.toObject(), ...reqBody };
+
+    const filledFields = FIELDS.filter((field) => {
+      const value = mergedData[field];
+      if (!value) return false;
+      if (typeof value === "string" && value.trim() === "") return false;
+      return true;
+    }).length;
+
+    const userPercentage = Math.round((filledFields / FIELDS.length) * 100);
+
+    // 🔹 Add userPercentage to update
+    reqBody.userPercentage = userPercentage;
+
+    // 🔹 Update user in DB
+    const data = await User.updateOne({ _id: userId }, { $set: reqBody });
 
     return {
       status: "success",
       message: "Profile updated successfully",
       data,
+      userPercentage, // ✅ return updated percentage
     };
   } catch (error: any) {
     return {
