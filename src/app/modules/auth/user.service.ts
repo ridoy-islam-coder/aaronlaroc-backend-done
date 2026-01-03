@@ -303,9 +303,6 @@ export const userSelfUpdateService = async (req: Request) => {
       "state",
       "company",
       "yearStarted",
-      "email",
-      "password",
-      "phoneNumber",
       "imgUrl" // ✅ included
     ];
 
