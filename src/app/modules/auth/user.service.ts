@@ -446,77 +446,7 @@ export const getAllOwnUserDataService = async (loggedInUserId: string) => {
   
   ]);
 
-  return { user,homeauto, medical, financial,socialInfo };
-};
-
-
-
-
-
-
-
-// export const getAllUserDataService = async (
-//   requestedUserId: string,
-//   loggedInUserId: string
-// ) => {
-
-  
-//   const user = await User.findById(requestedUserId);
-//   if (!user) throw new Error("USER_NOT_FOUND");
-
-//   const isOwnData =
-//     requestedUserId.toString() === loggedInUserId.toString();
-
-//   const isProxyUser = user.proxysetId.some(
-//     (id: any) => id.toString() === loggedInUserId.toString()
-//   );
-
-//   if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
-
-//   const [homeauto, medical, financial, socialInfo] = await Promise.all([
-//     HomeAutoModel.find({ userID: user._id }),
-//     MedicalModel.find({ userID: user._id }),
-//     FinancialModel.find({ userID: user._id }),
-//     SocialInfoModel.find({ userID: user._id }),
-//   ]);
-
-//   return {
-//     user,       
-//     homeauto,
-//     medical,
-//     financial,
-//     socialInfo
-//   };
-// };
-
-
-
-
-
-export const getAllUserDataService = async (
-  requestedUserId: string,
-  loggedInUserId: string
-) => {
-  const user = await User.findById(requestedUserId);
-  if (!user) throw new Error("USER_NOT_FOUND");
-
-  const isOwnData =
-    requestedUserId.toString() === loggedInUserId.toString();
-
-  const isProxyUser = user.proxysetId.some(
-    (id: any) => id.toString() === loggedInUserId.toString()
-  );
-
-  if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
-
-  const [homeauto, medical, financial, socialInfo] = await Promise.all([
-    HomeAutoModel.find({ userID: user._id }),
-    MedicalModel.find({ userID: user._id }),
-    FinancialModel.find({ userID: user._id }),
-    SocialInfoModel.find({ userID: user._id }),
-  ]);
-
-  // 🔢 Calculate percentages
+    // 🔢 Calculate percentages
   const homeautoPercentage = homeauto.reduce(
     (sum, item) => sum + (item.homeautoPercentage || 0),
     0
@@ -543,21 +473,56 @@ export const getAllUserDataService = async (
     financialPercentage +
     socialInfoPercentage;
 
-  return {
-    user,
-    homeauto,
-    medical,
-    financial,
-    socialInfo,
-    percentages: {
+
+  return { user,homeauto, medical, financial,socialInfo , percentages: {
       homeautoPercentage,
       medicalPercentage,
       financialPercentage,
       socialInfoPercentage,
       totalPercentage
-    }
+    }};
+};
+
+
+
+
+
+
+
+export const getAllUserDataService = async (
+  requestedUserId: string,
+  loggedInUserId: string
+) => {
+
+  
+  const user = await User.findById(requestedUserId);
+  if (!user) throw new Error("USER_NOT_FOUND");
+
+  const isOwnData =
+    requestedUserId.toString() === loggedInUserId.toString();
+
+  const isProxyUser = user.proxysetId.some(
+    (id: any) => id.toString() === loggedInUserId.toString()
+  );
+
+  if (!isOwnData && !isProxyUser) throw new Error("ACCESS_DENIED");
+
+  const [homeauto, medical, financial, socialInfo] = await Promise.all([
+    HomeAutoModel.find({ userID: user._id }),
+    MedicalModel.find({ userID: user._id }),
+    FinancialModel.find({ userID: user._id }),
+    SocialInfoModel.find({ userID: user._id }),
+  ]);
+
+  return {
+    user,       
+    homeauto,
+    medical,
+    financial,
+    socialInfo
   };
 };
+
 
 
 
