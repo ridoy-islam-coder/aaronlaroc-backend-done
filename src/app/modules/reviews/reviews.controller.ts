@@ -6,17 +6,33 @@ import { GetAllReviewsService,  ReviewService, updateReviewService } from "./rev
 
 
 
-
 export const ReviewController = async (req: Request, res: Response) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ status: false, message: "User not authenticated" });
+    }
+
     const result = await ReviewService(req);
+
     if (result.status) {
-      return res.status(201).json(result);
+      // Always return object with message and data
+      return res.status(201).json({
+        status: true,
+        message: result.message,
+        data: result.data
+      });
     } else {
-      return res.status(500).json(result);
+      return res.status(500).json({
+        status: false,
+        message: result.message,
+        error: result.data
+      });
     }
   } catch (err: any) {
-    return res.status(500).json({ status: false, message: err.message });
+    return res.status(500).json({
+      status: false,
+      message: err.message
+    });
   }
 };
 

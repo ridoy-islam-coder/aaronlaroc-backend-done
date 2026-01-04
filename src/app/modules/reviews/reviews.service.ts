@@ -5,26 +5,36 @@ import { ReviewModel } from "./reviews.model";
 
 
 
-
 export const ReviewService = async (req: Request) => {
- 
   try {
-     let user_id = req.user?.id;
+    let user_id = req.user?.id;
+
+    if (!user_id) {
+      throw new Error("User not found in request");
+    }
+
     const { comment, rating } = req.body;
-   
 
-    const newReport = await ReviewModel.create({ comment, rating, userID: user_id });
-    console.log("Report created successfully");
+    const newReport = await ReviewModel.create({
+      comment,
+      rating,
+      userID: user_id
+    });
 
-    return { status: true, message: "Report created successfully", data: newReport };
+    return {
+      status: true,
+      message: "Report created successfully",
+      data: newReport
+    };
   } catch (error: any) {
     console.log("Error creating report:", error);
-    return { status: false, message: "Failed to create report", data: error };
+    return {
+      status: false,
+      message: "Failed to create report",
+      data: error
+    };
   }
 };
-
-
-
 
 
   
