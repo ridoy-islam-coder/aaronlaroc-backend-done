@@ -11,12 +11,11 @@ export const ReviewService = async (
   req: Request
 ) => {
   try {
-    const { comment, rating, status, userID } = req.body;
+    const { comment, rating,  userID } = req.body;
 
     const newReport = await ReviewModel.create({
       comment,
       rating,
-      status,
       userID,
     });
 
