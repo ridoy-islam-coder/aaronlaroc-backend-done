@@ -10,26 +10,15 @@ import { ReportModel } from "./report.model";
 
 export const ReportService = async (req: Request, res: Response) => {
   try {
-    const {firstName,
-      lastName,
-      email,
-      phoneNumber,
-      company,
-      companysize,
-      jobtitle,
-      details,
+    const {
+      problemtitle,
+      desdetails,
       status, 
       userID, } = req.body;
 
     const newReport = await ReportModel.create({
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      company,
-      companysize,
-      jobtitle,
-      details,
+      problemtitle,
+      desdetails,
       status, 
       userID,
     });
@@ -119,14 +108,8 @@ export const updateReportService = async (req: Request) => {
 
  
 
-    report.firstName = requestBody.firstName ?? report.firstName;
-    report.lastName = requestBody.lastName ?? report.lastName;
-    report.email = requestBody.email ?? report.email;
-    report.phoneNumber = requestBody.phoneNumber ?? report.phoneNumber;
-    report.company = requestBody.company ?? report.company;
-    report.companysize = requestBody.companysize ?? report.companysize;
-    report.jobtitle = requestBody.jobtitle ?? report.jobtitle;
-    report.details = requestBody.details ?? report.details;
+    report.problemtitle = requestBody.problemtitle ?? report.problemtitle;
+    report.desdetails = requestBody.desdetails ?? report.desdetails;
     report.status = requestBody.status ?? report.status;
 
     await report.save();

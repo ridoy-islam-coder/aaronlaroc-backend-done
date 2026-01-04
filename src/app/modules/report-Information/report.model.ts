@@ -11,14 +11,9 @@ import { REPORT } from './report.interface';
 const financialSchema =  new Schema<REPORT>({
     
     
-    firstName: {type: String, required: true},
-    lastName: {type: String, required: true},
-    email: {type: String, required: true},
-    phoneNumber: {type: String, required: true},
-    company: {type: String, required: false},
-    companysize: {type: String, required: false},
-    jobtitle: { type: String, required:true },
-    details: { type: String, required:true },
+   
+    problemtitle: { type: String, required:true },
+    desdetails: { type: String, required:true },
     status: { 
     type: String, 
     enum: ["Progress", "Completed"], 
