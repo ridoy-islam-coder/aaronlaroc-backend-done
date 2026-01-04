@@ -6,11 +6,7 @@ const financialSchema =  new Schema<Review>({
     
    
     comment: { type: String, required:true },
-    rating: {
-    type: Number,
-    required: true
-   },
-    
+    rating: {type: Number,required: true },
     userID: { type: Types.ObjectId,   ref: 'User',required:true},
 
     },{
