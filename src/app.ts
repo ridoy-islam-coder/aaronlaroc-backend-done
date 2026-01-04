@@ -14,6 +14,7 @@ import { SubscriptionRoutes } from './app/modules/subscriptions-information/subs
 import { startSubscriptionExpireCron } from './app/modules/subscriptions-information/subscriptionExpire.cron';
 import { requestLogger } from './helpers/requestLogger';
 import dotenv from "dotenv";
+import { ReviewRoutes } from './app/modules/reviews/reviews.routes';
 dotenv.config();
 
 
@@ -53,6 +54,7 @@ app.use("/api/v1",homeautoRoutes)
 app.use("/api/v1",ReportRoutes)
 app.use("/api/v1",PackageRoutes)
 app.use("/api/v1",SubscriptionRoutes)
+app.use("/api/v1",ReviewRoutes)
 
 
 

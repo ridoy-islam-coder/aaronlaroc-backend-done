@@ -1,0 +1,102 @@
+import { Request, Response } from "express";
+import { ReviewModel } from "./reviews.model";
+import { ServiceResponse } from "./reviews.interface";
+
+
+
+
+
+
+export const ReviewService = async (
+  req: Request
+): Promise<ServiceResponse> => {
+  try {
+    const { comment, rating, status, userID } = req.body;
+
+    const newReport = await ReviewModel.create({
+      comment,
+      rating,
+      status,
+      userID,
+    });
+
+    return {
+      status: true,
+      message: "Report created successfully",
+      data: newReport,
+    };
+  } catch (error: any) {
+    return {
+      status: false,
+      message: "Failed to create report",
+      data: error,
+    };
+  }
+};
+
+
+
+
+
+  
+
+
+
+export const GetAllReviewsService = async (
+  req: Request
+): Promise<ServiceResponse> => {
+  try {
+    const reports = await ReviewModel.find()
+      .populate("userID", "firstName lastName email imgUrl");
+
+    return {
+      status: true,
+      message: "All reports fetched successfully",
+      data: reports
+    };
+  } catch (error: any) {
+    return {
+      status: false,
+      message: "Failed to fetch reports",
+      data: error
+    };
+  }
+};
+
+
+
+
+
+
+
+
+
+export const updateReviewService = async (
+  req: Request
+): Promise<ServiceResponse> => {
+  try {
+    const reportId = req.params.id;
+    const requestBody = req.body;
+
+    const report = await ReviewModel.findById(reportId);
+    if (!report) {
+      return { status: false, message: "Report not found" };
+    }
+
+    report.comment = requestBody.comment ?? report.comment;
+    report.rating = requestBody.rating ?? report.rating;
+
+    await report.save();
+
+    return {
+      status: true,
+      message: "Report updated successfully"
+    };
+  } catch (error: any) {
+    return {
+      status: false,
+      message: "Something went wrong",
+      data: error
+    };
+  }
+};
