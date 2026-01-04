@@ -7,7 +7,7 @@ import { GetAllReviewsService,  ReviewService, updateReviewService } from "./rev
 export const ReviewController = async (
   req: Request,
   res: Response
-): Promise<void> => {
+)=> {
   try {
     const result = await ReviewService(req);
 
@@ -37,7 +37,7 @@ export const ReviewController = async (
 export const GetAllReviewsController = async (
   req: Request,
   res: Response
-): Promise<void> => {
+) => {
   try {
     const result = await GetAllReviewsService(req);
 
@@ -68,7 +68,7 @@ export const GetAllReviewsController = async (
 export const updateReviewController = async (
   req: Request,
   res: Response
-): Promise<void> => {
+) => {
   try {
     const result = await updateReviewService(req);
 
