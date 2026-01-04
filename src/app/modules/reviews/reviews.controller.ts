@@ -68,29 +68,15 @@ export const GetAllReviewsController = async (
 
 
 
-export const updateReviewController = async (
-  req: Request,
-  res: Response
-) => {
+export const updateReportAdminController = async (req: Request, res: Response) => {
   try {
-    const result = await updateReviewService(req);
-
+    const result = await updateReviewService(req); // service uses req.params.id
     if (result.status) {
-      res.status(200).json({
-        status: "success",
-        message: result.message
-      });
+      return res.status(200).json(result);
     } else {
-      res.status(404).json({
-        status: "error",
-        message: result.message,
-        error: result.data
-      });
+      return res.status(404).json(result);
     }
   } catch (err: any) {
-    res.status(500).json({
-      status: "error",
-      message: err.message
-    });
+    return res.status(500).json({ status: false, message: err.message });
   }
 };

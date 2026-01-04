@@ -70,32 +70,21 @@ export const GetAllReviewsService = async (
 
 
 
-export const updateReviewService = async (
-  req: Request
-) => {
+export const updateReviewService = async (req: Request) => {
   try {
-    const reportId = req.user?.id;
+    const reportId = req.params.id; // Admin updates any report
     const requestBody = req.body;
 
     const report = await ReviewModel.findById(reportId);
-    if (!report) {
-      return { status: false, message: "Report not found" };
-    }
+    if (!report) return { status: false, message: "Report not found" };
 
     report.comment = requestBody.comment ?? report.comment;
     report.rating = requestBody.rating ?? report.rating;
 
     await report.save();
 
-    return {
-      status: true,
-      message: "Report updated successfully"
-    };
+    return { status: true, message: "Report updated successfully", data: report };
   } catch (error: any) {
-    return {
-      status: false,
-      message: "Something went wrong",
-      data: error
-    };
+    return { status: false, message: "Something went wrong", data: error };
   }
 };
