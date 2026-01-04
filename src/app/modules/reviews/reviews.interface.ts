@@ -8,8 +8,8 @@ export interface Review extends Document{
   createdAt: Date;
   updatedAt: Date;
 }
-export interface ServiceResponse<T = any> {
-  status: boolean;
-  message: string;
-  data?: T;
-}
+// export interface ServiceResponse<T = any> {
+//   status: boolean;
+//   message: string;
+//   data?: T;
+// }

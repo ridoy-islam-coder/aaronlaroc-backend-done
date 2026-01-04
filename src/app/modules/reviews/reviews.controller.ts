@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { GetAllReviewsService,  ReviewService, updateReviewService } from "./reviews.service";
-import { ServiceResponse } from "./reviews.interface";
+
 
 
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ReviewModel } from "./reviews.model";
-import { ServiceResponse } from "./reviews.interface";
+
 
 
 
@@ -9,7 +9,7 @@ import { ServiceResponse } from "./reviews.interface";
 
 export const ReviewService = async (
   req: Request
-): Promise<ServiceResponse> => {
+) => {
   try {
     const { comment, rating, status, userID } = req.body;
 
@@ -44,7 +44,7 @@ export const ReviewService = async (
 
 export const GetAllReviewsService = async (
   req: Request
-): Promise<ServiceResponse> => {
+) => {
   try {
     const reports = await ReviewModel.find()
       .populate("userID", "firstName lastName email imgUrl");
@@ -73,7 +73,7 @@ export const GetAllReviewsService = async (
 
 export const updateReviewService = async (
   req: Request
-): Promise<ServiceResponse> => {
+) => {
   try {
     const reportId = req.params.id;
     const requestBody = req.body;
