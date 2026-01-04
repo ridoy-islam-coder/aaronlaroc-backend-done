@@ -1,7 +1,10 @@
 import express from "express";
-import { auth, isAdmin } from "../../middleware/auth.middleware";
 import { ReviewService, updateReviewService } from "./reviews.service";
-import { GetAllReportsController } from "../report-Information/report.controller";
+import { GetAllReviewsController } from "./reviews.controller";
+import { auth, isAdmin } from "../../middleware/auth.middleware";
+
+
+
 
 
 
@@ -14,7 +17,7 @@ const router = express.Router();
 // create Financial Information 
 router.post("/create-review",auth,ReviewService)
 
-router.get("/all-reviews", auth,isAdmin,GetAllReportsController);
+router.get("/all-reviews", auth,isAdmin,GetAllReviewsController);
 // Only admins can update reports
 router.put("/reviews/:id", auth,isAdmin, updateReviewService);
 

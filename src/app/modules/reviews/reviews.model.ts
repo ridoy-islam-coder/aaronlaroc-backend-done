@@ -13,4 +13,4 @@ const financialSchema =  new Schema<Review>({
     timestamps: true,versionKey: false
 })
 
-export const ReviewModel = model<Review>("review", financialSchema);
+export const ReviewModel = model<Review>("reviews", financialSchema);
