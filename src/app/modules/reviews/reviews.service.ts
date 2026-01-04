@@ -6,30 +6,20 @@ import { ReviewModel } from "./reviews.model";
 
 
 
-
-export const ReviewService = async (
-  req: Request
-) => {
+export const ReviewService = async (req: Request) => {
+ 
   try {
-    const { comment, rating,  userID } = req.body;
+     let user_id = req.user?.id;
+    const { comment, rating } = req.body;
+   
 
-    const newReport = await ReviewModel.create({
-      comment,
-      rating,
-      userID,
-    });
+    const newReport = await ReviewModel.create({ comment, rating, userID: user_id });
+    console.log("Report created successfully");
 
-    return {
-      status: true,
-      message: "Report created successfully",
-      data: newReport,
-    };
+    return { status: true, message: "Report created successfully", data: newReport };
   } catch (error: any) {
-    return {
-      status: false,
-      message: "Failed to create report",
-      data: error,
-    };
+    console.log("Error creating report:", error);
+    return { status: false, message: "Failed to create report", data: error };
   }
 };
 
@@ -74,7 +64,7 @@ export const updateReviewService = async (
   req: Request
 ) => {
   try {
-    const reportId = req.params.id;
+    const reportId = req.user?.id;
     const requestBody = req.body;
 
     const report = await ReviewModel.findById(reportId);

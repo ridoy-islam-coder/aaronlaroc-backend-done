@@ -10,17 +10,18 @@ import { ReportModel } from "./report.model";
 
 export const ReportService = async (req: Request, res: Response) => {
   try {
+    let userID = req.user?.id;
     const {
       problemtitle,
       desdetails,
       status, 
-      userID, } = req.body;
+      } = req.body;
 
     const newReport = await ReportModel.create({
       problemtitle,
       desdetails,
       status, 
-      userID,
+      userID: userID,
     });
 
     return {
@@ -47,8 +48,8 @@ export const ReportService = async (req: Request, res: Response) => {
 
 export const GetAllReportsService = async () => {
   try {
-    const reports = await ReportModel.find()
-  //populate("userID","firstName lastName email imgUrl  ");
+
+    const reports = await ReportModel.find().populate("userID", "firstName lastName email imgUrl  ");
 
     return {
       status: true,

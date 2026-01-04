@@ -4,34 +4,18 @@ import { GetAllReviewsService,  ReviewService, updateReviewService } from "./rev
 
 
 
-export const ReviewController = async (
-  req: Request,
-  res: Response
-)=> {
+export const ReviewController = async (req: Request, res: Response) => {
   try {
     const result = await ReviewService(req);
-
     if (result.status) {
-      res.status(201).json({
-        status: "success",
-        message: result.message,
-        data: result.data,
-      });
+      return res.status(201).json(result);
     } else {
-      res.status(400).json({
-        status: "error",
-        message: result.message,
-        error: result.data,
-      });
+      return res.status(500).json(result);
     }
   } catch (err: any) {
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-    });
+    return res.status(500).json({ status: false, message: err.message });
   }
 };
-
 
 
 export const GetAllReviewsController = async (
