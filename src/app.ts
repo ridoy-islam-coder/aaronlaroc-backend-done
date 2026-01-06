@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from "path";
 import rateLimit from 'express-rate-limit';
 import { userRoutes } from './app/modules/auth/user.routes';
 import errorHandler from './app/middleware/errorHandler';
@@ -20,18 +21,20 @@ dotenv.config();
 
 
 
+
 const app = express();
 
-
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 app.use(cors({
-  origin: "*"  // সবাই থেকে আসতে পারবে
+  origin: "*"  
 }));
 // app.use(cors());
 app.use(express.json({  limit: '50mb'}));
 app.use(helmet());
 const limiter = rateLimit({windowMs: 20 * 60 * 1000, max: 100, });
 app.use(limiter);
-app.use(requestLogger); // 🔹 all incoming requests logged
+app.use(requestLogger);
 
 
 
