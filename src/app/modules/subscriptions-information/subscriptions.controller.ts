@@ -107,14 +107,19 @@ export const checkoutSuccessController = catchAsync(async (req, res ) => {
 
     // Save subscription in DB   userId
     const subscription = await saveSubscriptionToDB(sessionId);
-
+  
     // Send response
-    sendResponse(res, {
-        statusCode: StatusCodes.OK,
-        success: true,
-        message: 'Subscription created successfully',
-        data: subscription,
-    });
+//     sendResponse(res, {
+//         statusCode: StatusCodes.OK,
+//         success: true,
+//         message: 'Subscription created successfully',
+//         data: subscription,
+//     });
+// 
+
+     res.render('success', { subscription });
+
+
 });
 
 
