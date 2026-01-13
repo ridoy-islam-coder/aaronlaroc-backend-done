@@ -117,7 +117,7 @@ export const checkoutSuccessController = catchAsync(async (req, res ) => {
 //     });
 // 
 
-     res.render('success', { subscription });
+     res.render('subscription-success', { subscription });
 
 
 });
