@@ -127,7 +127,20 @@ export const checkoutSuccessController = catchAsync(async (req, res ) => {
 
 
 
+ const monthlyEarningsStats = catchAsync(async (req, res) => {
+          const year = Number(req.query.year) || new Date().getFullYear();
 
+          const result =
+               await SubscriptionService.getMonthlyEarningsStatsFromDB(year);
+
+          sendResponse(res, {
+               statusCode: StatusCodes.OK,
+               success: true,
+               message: 'Monthly earnings stats retrieved successfully',
+               data: result,
+          });
+     }
+);
 
 
 
@@ -142,5 +155,6 @@ export const SubscriptionController = {
      cancelSubscription,
      // orderSuccess,
      orderCancel,
+     monthlyEarningsStats,
   
 };
