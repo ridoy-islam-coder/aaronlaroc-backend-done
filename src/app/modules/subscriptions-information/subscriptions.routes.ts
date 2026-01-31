@@ -16,7 +16,7 @@ router.post('/create-checkout-session/:id', auth, SubscriptionController.createC
 router.post('/update/:id', auth, SubscriptionController.updateSubscription);
 router.delete('/subscription/cancel/:id',  SubscriptionController.cancelSubscription);
 router.get('/monthly-earnings-stats',auth,isAdmin,SubscriptionController.monthlyEarningsStats);
-router.get('subscriptions/stats',auth,isAdmin,SubscriptionController.getEarningsStatsController);
+router.get('/subscriptions/stats',auth,isAdmin,SubscriptionController.getEarningsStatsController);
 
 
 // Example of protected route using subscriptionGuard
