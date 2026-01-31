@@ -443,7 +443,7 @@ export const getEarningsStatsService = async () => {
     const stats = await Subscription.aggregate([
         {
             $group: {
-                _id: null,
+                _id: "$userId",
                 totalEarnings: { $sum: "$price" },
                 activeSubscriptions: { 
                     $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } 
