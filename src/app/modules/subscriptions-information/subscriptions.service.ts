@@ -439,6 +439,36 @@ const getMonthlyEarningsStatsFromDB = async (year: number) => {
 
 
 
+export const getEarningsStatsService = async () => {
+    const stats = await Subscription.aggregate([
+        {
+            $group: {
+                _id: null,
+                totalEarnings: { $sum: "$price" },
+                activeSubscriptions: { 
+                    $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } 
+                },
+                expiredSubscriptions: { 
+                    $sum: { $cond: [{ $eq: ["$status", "expired"] }, 1, 0] } 
+                },
+                cancelledSubscriptions: { 
+                    $sum: { $cond: [{ $eq: ["$status", "cancel"] }, 1, 0] } 
+                },
+                deactivatedSubscriptions: { 
+                    $sum: { $cond: [{ $eq: ["$status", "deactivated"] }, 1, 0] } 
+                },
+            }
+        }
+    ]);
+
+    return stats[0] || {
+        totalEarnings: 0,
+        activeSubscriptions: 0,
+        expiredSubscriptions: 0,
+        cancelledSubscriptions: 0,
+        deactivatedSubscriptions: 0,
+    };
+};
 
 
 
@@ -452,6 +482,7 @@ export const SubscriptionService = {
      createSubscriptionCheckoutSession,
      upgradeSubscriptionToDB,
      cancelSubscriptionToDB,
+     getEarningsStatsService,
      // successMessage,
      saveSubscriptionToDB,
      getMonthlyEarningsStatsFromDB,
