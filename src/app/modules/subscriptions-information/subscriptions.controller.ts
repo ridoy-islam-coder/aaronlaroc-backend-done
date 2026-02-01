@@ -1,9 +1,10 @@
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 
-import { getMonthlyRevenueService, saveSubscriptionToDB, SubscriptionService } from "./subscriptions.service";
+import { getMonthlyRevenueService, handlePaymentFailed, handleSubscriptionDeleted, saveSubscriptionToDB, SubscriptionService } from "./subscriptions.service";
 import AppError from "../../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
+import stripe, { Stripe } from "stripe";
 
 const subscriptions = catchAsync(async (req, res) => {
      const result = await SubscriptionService.subscriptionsFromDB(req.query);
@@ -158,6 +159,88 @@ export const getMonthlyRevenueController = catchAsync(async (req, res) => {
         data: revenueData,
     });
 });
+
+
+
+
+
+
+
+export const stripeWebhookHandler = catchAsync( async (req, res) => {
+  const sig = req.headers["stripe-signature"] as string | undefined;
+
+  if (!sig) {
+    return sendResponse(res, {
+      statusCode: StatusCodes.BAD_REQUEST,
+      success: false,
+      message: "Missing Stripe signature",
+      data: null,
+    });
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return sendResponse(res, {
+      statusCode: StatusCodes.BAD_REQUEST,
+      success: false,
+      message: "Webhook signature verification failed",
+      data: null,
+    });
+  }
+
+  try {
+    let responseData;
+
+    switch (event.type) {
+      case "customer.subscription.deleted":
+        responseData = await handleSubscriptionDeleted(
+          event.data.object as Stripe.Subscription
+        );
+        break;
+
+      case "invoice.payment_failed":
+        responseData = await handlePaymentFailed(
+          event.data.object as Stripe.Invoice
+        );
+        break;
+
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+        responseData = {
+          statusCode: StatusCodes.OK,
+          success: true,
+          message: `Unhandled event type ${event.type}`,
+          data: null,
+        };
+    }
+
+    return sendResponse(res, responseData);
+  } catch (err: any) {
+    console.error("Webhook handler error:", err);
+    return sendResponse(res, {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: err.message || "Internal Server Error",
+      data: null,
+    });
+  }
+});
+
+
+
+
+
+
+
+
 
 export const SubscriptionController = {
      subscriptions,

@@ -12,32 +12,6 @@ import { getErrorCount, incrementErrorCount } from "../../../helpers/errorCounte
 
 
 
-// export const registerUser = async (req:Request, res:Response, next:NextFunction) => {
-
-//     try{
-//       const { phoneNumber, email, password } = req.body;
-
-//       if (!phoneNumber || !email || !password) {
-//         return res.status(400).json({ message: "All fields are required" });
-//       }
-
-//      const user = await existingUser(phoneNumber, email, password);
-
-   
-//   // 🔹 Success log
-//     logSuccess(req, "User registered successfully", { userId: user._id, email: user.email });
-// return res.status(201).json({success: true,message: "User registered successfully",statusCode: 201, data: { _id: user._id ,phoneNumber: user.phoneNumber,email: user.email,role: user.role,},meta: null});
-
-
-//     }catch(error){
-//         next(error);
-//     }
-
-
-
-// }
-
-
 
 
 
@@ -114,22 +88,6 @@ export const GetProfileData=async (req:Request,res:Response,next:NextFunction) =
 
 }
 
-
-
-// export const userSelfUpdate = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const result = await userSelfUpdateService(req);
-
-//   if (result.status === "success") {
-//     logSuccess(req, "User updated own profile", {
-//       userId: req.user?.id,
-//     });
-//   }
-
-//   res.json(result);
-// };
 
 export const userSelfUpdate = async (
   req: Request,

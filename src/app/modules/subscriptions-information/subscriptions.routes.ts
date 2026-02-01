@@ -1,6 +1,6 @@
 import express from 'express';
 import { auth, isAdmin } from '../../middleware/auth.middleware';
-import { checkoutSuccessController, SubscriptionController } from './subscriptions.controller';
+import { checkoutSuccessController, stripeWebhookHandler, SubscriptionController } from './subscriptions.controller';
 import { subscriptionGuard } from '../../middleware/subscriptionGuard';
 
 
@@ -24,6 +24,7 @@ router.get('/premium-content', auth, subscriptionGuard, (req, res) => {
     res.send('This is premium content for active subscribers only.');
 });
 
+router.post( '/stripe/webhook',express.raw({ type: 'application/json' }), stripeWebhookHandler);
 
 
 

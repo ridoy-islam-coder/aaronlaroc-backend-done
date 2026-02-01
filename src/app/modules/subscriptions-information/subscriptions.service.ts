@@ -290,6 +290,8 @@ interface MyStripeSubscription extends Stripe.Subscription {
     current_period_end?: number;
 }
 
+
+
 export const saveSubscriptionToDB = async (sessionId: string) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -478,7 +480,73 @@ export const getMonthlyRevenueService = async (): Promise<MonthlyRevenue[]> => {
 
 
 
+/**
+ * Handle subscription deleted from Stripe
+ */
+export const handleSubscriptionDeleted = async (sub: Stripe.Subscription) => {
+  const dbSub = await Subscription.findOne({ stripeSubscriptionId: sub.id });
+  if (!dbSub) {
+    return {
+      success: false,
+      message: "Subscription record not found",
+      data: null,
+      statusCode: 200,
+    };
+  }
 
+  await Subscription.findOneAndUpdate(
+    { stripeSubscriptionId: sub.id },
+    { status: "expired" }
+  );
+
+  await User.findByIdAndUpdate(dbSub.userId, {
+    $set: { stripeCustomerId: null, isSubscribed: false },
+  });
+
+  return {
+    success: true,
+    message: "Subscription expired and user updated successfully",
+    data: { subscriptionId: sub.id, userId: dbSub.userId },
+    statusCode: 200,
+  };
+};
+
+/**
+ * Handle payment failed from Stripe
+ */
+export const handlePaymentFailed = async (invoice: Stripe.Invoice) => {
+   // as any ব্যবহার করে TS কে বলছি: আমি নিজে জানি invoice.subscription আছে
+  const subId = (invoice as any).subscription as string | undefined;
+  if (!subId) {
+    return {
+      success: false,
+      message: "No subscription found in invoice",
+      data: null,
+      statusCode: 200,
+    };
+  }
+
+  const dbSub = await Subscription.findOne({ stripeSubscriptionId: subId });
+  if (!dbSub) {
+    return {
+      success: false,
+      message: "No subscription record found for this invoice",
+      data: null,
+      statusCode: 200,
+    };
+  }
+
+  await User.findByIdAndUpdate(dbSub.userId, {
+    $set: { stripeCustomerId: null, isSubscribed: false },
+  });
+
+  return {
+    success: true,
+    message: "Payment failed: user updated successfully",
+    data: { subscriptionId: subId, userId: dbSub.userId },
+    statusCode: 200,
+  };
+};
 
 
 export const SubscriptionService = {
