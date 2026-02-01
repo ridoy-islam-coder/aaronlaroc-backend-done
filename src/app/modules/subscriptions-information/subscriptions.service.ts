@@ -8,6 +8,7 @@ import { ISubscription } from './subscriptions.interface';
 import { Subscription } from './subscriptions.model';
 import { StatusCodes } from 'http-status-codes';
 import { Types } from 'mongoose'; 
+import dayjs from 'dayjs';
 
 
 const subscriptionDetailsFromDB = async (id: string): Promise<{ subscription: ISubscription | {} }> => {
@@ -437,37 +438,42 @@ const getMonthlyEarningsStatsFromDB = async (year: number) => {
 
 
 
+interface MonthlyRevenue {
+  month: string;
+  revenue: number;
+}
 
+export const getMonthlyRevenueService = async (): Promise<MonthlyRevenue[]> => {
+    // get current year
+    const currentYear = dayjs().year();
 
-export const getEarningsStatsService = async () => {
-    const stats = await Subscription.aggregate([
+    // Aggregate monthly revenue
+    const revenue = await Subscription.aggregate([
+        {
+            $match: {
+                currentPeriodStart: {
+                    $gte: new Date(`${currentYear}-01-01`),
+                    $lte: new Date(`${currentYear}-12-31`)
+                },
+                status: "active" // only active subscriptions count
+            }
+        },
         {
             $group: {
-                _id: "$userId",
-                totalEarnings: { $sum: "$price" },
-                activeSubscriptions: { 
-                    $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } 
-                },
-                expiredSubscriptions: { 
-                    $sum: { $cond: [{ $eq: ["$status", "expired"] }, 1, 0] } 
-                },
-                cancelledSubscriptions: { 
-                    $sum: { $cond: [{ $eq: ["$status", "cancel"] }, 1, 0] } 
-                },
-                deactivatedSubscriptions: { 
-                    $sum: { $cond: [{ $eq: ["$status", "deactivated"] }, 1, 0] } 
-                },
+                _id: { $month: "$currentPeriodStart" },
+                totalRevenue: { $sum: "$price" }
             }
         }
     ]);
 
-    return stats[0] || {
-        totalEarnings: 0,
-        activeSubscriptions: 0,
-        expiredSubscriptions: 0,
-        cancelledSubscriptions: 0,
-        deactivatedSubscriptions: 0,
-    };
+    // Initialize array with 0 revenue for all months
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const revenueData: MonthlyRevenue[] = months.map((m, i) => {
+        const monthData = revenue.find(r => r._id === i + 1);
+        return { month: m, revenue: monthData ? monthData.totalRevenue : 0 };
+    });
+
+    return revenueData;
 };
 
 
@@ -482,7 +488,7 @@ export const SubscriptionService = {
      createSubscriptionCheckoutSession,
      upgradeSubscriptionToDB,
      cancelSubscriptionToDB,
-     getEarningsStatsService,
+     getMonthlyRevenueService,
      // successMessage,
      saveSubscriptionToDB,
      getMonthlyEarningsStatsFromDB,

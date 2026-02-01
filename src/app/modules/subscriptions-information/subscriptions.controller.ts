@@ -1,7 +1,7 @@
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 
-import { getEarningsStatsService, saveSubscriptionToDB, SubscriptionService } from "./subscriptions.service";
+import { getMonthlyRevenueService, saveSubscriptionToDB, SubscriptionService } from "./subscriptions.service";
 import AppError from "../../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
 
@@ -148,18 +148,16 @@ export const checkoutSuccessController = catchAsync(async (req, res ) => {
 
 
 
-
-export const getEarningsStatsController = catchAsync(async (req, res) => {
-    const stats = await getEarningsStatsService();
+export const getMonthlyRevenueController = catchAsync(async (req, res) => {
+    const revenueData = await getMonthlyRevenueService();
 
     sendResponse(res, {
         statusCode: StatusCodes.OK,
         success: true,
-        message: 'Earnings stats fetched successfully',
-        data: stats,
+        message: "Monthly revenue fetched successfully",
+        data: revenueData,
     });
 });
-
 
 export const SubscriptionController = {
      subscriptions,
@@ -167,7 +165,7 @@ export const SubscriptionController = {
      createCheckoutSession,
      updateSubscription,
      cancelSubscription,
-     getEarningsStatsController,
+     getMonthlyRevenueController,
      // orderSuccess,
      orderCancel,
      monthlyEarningsStats,
