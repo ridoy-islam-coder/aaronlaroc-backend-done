@@ -762,8 +762,10 @@ export const adminEmailService = async (req:Request) => {
     let { email } = req.body;
     let code = Math.floor(100000 + Math.random() * 900000);
     let EmailTo=email ;
-    let EmailText = `Your code is= ${code}`;
-    let EmailSubject = `PlainB E-commerce Website Email Verification Code `;
+    let EmailText = `Hello, your OTP code is ${code}`;
+    let EmailSubject = "Your OTP Code";
+    
+    
     await SendEmail(EmailTo, EmailText, EmailSubject)
     await User.updateOne(
       { email: email },
