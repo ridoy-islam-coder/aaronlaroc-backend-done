@@ -5,6 +5,7 @@ import { getMonthlyRevenueService, handlePaymentFailed, handleSubscriptionDelete
 import AppError from "../../../errors/AppError";
 import { StatusCodes } from "http-status-codes";
 import stripe, { Stripe } from "stripe";
+import { config } from "../../config";
 
 const subscriptions = catchAsync(async (req, res) => {
      const result = await SubscriptionService.subscriptionsFromDB(req.query);
@@ -184,7 +185,8 @@ export const stripeWebhookHandler = catchAsync( async (req, res) => {
     event = stripe.webhooks.constructEvent(
       req.body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+     //  process.env.STRIPE_WEBHOOK_SECRET!
+     config.stripe.stripe_webhook_secret as string
     );
   } catch (err) {
     console.error("Webhook signature verification failed:", err);

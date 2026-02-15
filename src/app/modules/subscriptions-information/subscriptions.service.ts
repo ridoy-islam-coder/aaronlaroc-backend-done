@@ -511,11 +511,9 @@ export const handleSubscriptionDeleted = async (sub: Stripe.Subscription) => {
   };
 };
 
-/**
- * Handle payment failed from Stripe
- */
+
 export const handlePaymentFailed = async (invoice: Stripe.Invoice) => {
-   // as any ব্যবহার করে TS কে বলছি: আমি নিজে জানি invoice.subscription আছে
+
   const subId = (invoice as any).subscription as string | undefined;
   if (!subId) {
     return {
