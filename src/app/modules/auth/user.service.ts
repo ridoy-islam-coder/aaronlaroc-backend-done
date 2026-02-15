@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { config } from './../../config/index';
 import {  Request } from "express";
 import mongoose, { Types } from 'mongoose';
-import { SendEmail } from "../../../helpers/emailHelper";
+import { generateOTPEmailTemplate, SendEmail } from "../../../helpers/emailHelper";
 import { ReportModel } from "../report-Information/report.model";
 import { FinancialModel } from "../financial-Information/financial.model";
 import { MedicalModel } from "../medical-Information/medical.model";
@@ -758,24 +758,58 @@ export const getUsersWhoAddedMeAsProxyService = async (
 
 
 export const adminEmailService = async (req:Request) => {
-  try {
-    let { email } = req.body;
-    let code = Math.floor(100000 + Math.random() * 900000);
-    let EmailTo=email ;
-    let EmailText = `Hello, your OTP code is ${code}`;
-    let EmailSubject = "Your OTP Code";
+  // try {
+  //   let { email } = req.body;
+  //   let code = Math.floor(100000 + Math.random() * 900000);
+  //   let EmailTo=email ;
+  //   let EmailText = `Hello, your OTP code is ${code}`;
+      
+  //   let EmailSubject = "Your OTP Code";
     
     
-    await SendEmail(EmailTo, EmailText, EmailSubject)
+  //   await SendEmail(EmailTo, EmailText, EmailSubject)
+  //   await User.updateOne(
+  //     { email: email },
+  //     { otp: code },
+  //     { upsert: true }
+  //   );
+
+  //   return { status: "success", message: "6 digit code send successfully" };
+  // } catch (error) {
+  //    return {status:'failed', data: error};
+  // }
+
+
+   try {
+    const { email } = req.body;
+
+
+      // Step 1: Check if email exists in database
+    const userExists = await User.findOne({ email });
+    if (!userExists) {
+      return { status: "failed", message: "Email not registered" };
+    }
+    
+    // 6 digit OTP generate
+    const code = Math.floor(100000 + Math.random() * 900000);
+
+    // HTML template
+    const EmailHtml = generateOTPEmailTemplate(code);
+    const EmailSubject = "Your OTP Code";
+
+    // Send OTP email
+    await SendEmail(email, EmailSubject, EmailHtml);
+
+    // Save OTP to database (User model)
     await User.updateOne(
-      { email: email },
+      { email },
       { otp: code },
       { upsert: true }
     );
 
-    return { status: "success", message: "6 digit code send successfully" };
+    return { status: "success", message: "6 digit OTP sent successfully" };
   } catch (error) {
-     return {status:'failed', data: error};
+    return { status: "failed", data: error };
   }
 };
 

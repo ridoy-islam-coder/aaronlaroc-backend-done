@@ -26,7 +26,7 @@ export const config = {
     api_key: process.env.EMAIL_API_KEY,
   },
 
- 
+
 };
 
 //mongodb+srv://rkrafikridoy5887_db_user:ooVS91rbk62V05ZN@arron-backend-project.fodvybr.mongodb.net/?appName=arron-backend-project
