@@ -11,7 +11,7 @@ router.get('/', auth, SubscriptionController.subscriptions);
 router.get('/details', auth, SubscriptionController.subscriptionDetails);
 // router.get('/success', SubscriptionController.orderSuccess);
 router.get('/subscription/success', checkoutSuccessController);
-router.get('/cancel', SubscriptionController.orderCancel);
+router.get('/subscription/cancel', SubscriptionController.orderCancel);
 router.post('/create-checkout-session/:id', auth, SubscriptionController.createCheckoutSession);
 router.post('/update/:id', auth, SubscriptionController.updateSubscription);
 router.delete('/subscription/cancel/:id',  SubscriptionController.cancelSubscription);
