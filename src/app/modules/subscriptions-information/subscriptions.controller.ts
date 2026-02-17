@@ -92,9 +92,6 @@ const orderCancel = catchAsync(async (req, res) => {
 
 
 
-
-
-
 // Controller for Stripe checkout success
 export const checkoutSuccessController = catchAsync(async (req, res ) => {
     const sessionId = req.query.session_id as string;
